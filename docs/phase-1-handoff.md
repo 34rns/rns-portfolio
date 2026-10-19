@@ -28,11 +28,21 @@
 - Lighthouse mobile (two runs): performance 91–92, accessibility 100,
   best practices 100, SEO 100. LCP 3.0–3.2s, CLS 0.
 
+## Local pass (undeployed)
+
+- Mobile header: the small wordmark is hidden below `md`, so the page opens on
+the large masthead instead of printing RNS twice. Desktop keeps the small mark.
+- Deploy steps are documented in the README ("Deploying later"). Nothing was
+committed to the remote or deployed from this pass.
+
 ## Only you can do
 
 - Keep the admin password from this chat (stored locally in
   `.admin-credentials.txt`, git-ignored). Rotate with
   `npm run admin:hash -- "new-password"` and update the Vercel variable.
+- Deploy when you are on the Vercel account that owns the project:
+  `vercel --prod` from `portfolio/`. The header fix and any later local commits
+  go live then. See the README section for the variables involved.
 - Add a custom domain in Vercel if you want one, then set
   `NEXT_PUBLIC_SITE_URL` so sitemap and canonical URLs use it.
 - Create the Blob store before Phase 3 uploads.

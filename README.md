@@ -71,6 +71,41 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 Log in at `/admin/login`. `.env.example` documents every variable.
 
+## Deploying later
+
+The project is already linked to Vercel, but the local checkout is the source of
+truth: nothing here is auto-deployed while you work. When you are signed in to
+the Vercel account that owns `rns-portfolio`:
+
+```bash
+vercel login                # the account that owns the project
+vercel link --project rns-portfolio   # only if .vercel/ is missing
+vercel --prod               # build + deploy production
+```
+
+Variables production needs (values live in Vercel → Settings → Environment
+Variables, and locally in `.env.local`):
+
+```
+DATABASE_URL          # pooled Neon connection, the only one the app reads
+AUTH_SECRET
+ADMIN_EMAIL
+ADMIN_PASSWORD_HASH
+NEXT_PUBLIC_SITE_URL  # optional: pins canonicals, sitemap and OG URLs
+```
+
+The Neon integration also provides `DATABASE_URL_UNPOOLED` (direct connection);
+without `NEXT_PUBLIC_SITE_URL` the app falls back to
+`VERCEL_PROJECT_PRODUCTION_URL`, so canonicals still point at the deployment.
+
+Two project settings are already applied and should stay that way: Vercel
+Authentication is off (otherwise visitors hit a login wall) and the Git fork
+protection is off (otherwise pushes from this local Git identity are refused).
+A CLI deploy also requires the Git author email to match a Vercel seat.
+
+Nothing is pushed automatically. `git push` only publishes the repo; Vercel
+deploys production from `vercel --prod` or from a merged pull request.
+
 ## Scripts
 
 | Command | Purpose |
@@ -99,6 +134,7 @@ Log in at `/admin/login`. `.env.example` documents every variable.
 ## Phases
 
 - Phase 1 — platform, auth, admin CRUD, Professional theme, deploy. **Done.**
+- Local pass — mobile header de-duplicated, deploy steps documented. **Done.**
 - Phase 2 — payments, visitor signup, paid project flow.
 - Phase 3 — 3D model upload and the Anime 3D theme.
 - Phase 4 — remaining themes, one brief at a time.

@@ -27,10 +27,16 @@ const capabilities = [
 function SiteHeader() {
   return (
     <header className="mx-auto flex max-w-[1440px] items-center justify-between px-5 pt-7 md:px-10">
-      <Link href="/" className="display text-[1.35rem] font-semibold">
+      <Link
+        href="/"
+        className="display hidden text-[1.35rem] font-semibold md:block"
+      >
         RNS
       </Link>
-      <nav aria-label="Primary" className="flex items-center gap-5 text-[0.95rem]">
+      <nav
+        aria-label="Primary"
+        className="ml-auto flex items-center gap-5 text-[0.95rem]"
+      >
         <a href="#work" className="nav-link">
           Work
         </a>
