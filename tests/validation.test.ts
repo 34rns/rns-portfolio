@@ -75,4 +75,49 @@ describe("parseProjectForm", () => {
     if (result.success) return;
     expect(result.errors.coverImageUrl).toBeDefined();
   });
+
+  it("defaults the 3D stage when the theme does not use one", () => {
+    const result = parseProjectForm(formData());
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.modelUrl).toBe("");
+    expect(result.data.lighting).toBe("studio");
+    expect(result.data.modelScale).toBe(1);
+    expect(result.data.modelOffsetX).toBe(0);
+  });
+
+  it("accepts an uploaded model path and stage tuning", () => {
+    const result = parseProjectForm(
+      formData({
+        modelUrl: "/api/uploads/model/2026-10/scene.glb",
+        lighting: "neon",
+        modelScale: "1.4",
+        modelOffsetY: "-0.25",
+      }),
+    );
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.modelUrl).toBe("/api/uploads/model/2026-10/scene.glb");
+    expect(result.data.lighting).toBe("neon");
+    expect(result.data.modelScale).toBe(1.4);
+    expect(result.data.modelOffsetY).toBe(-0.25);
+  });
+
+  it("rejects an unknown lighting preset", () => {
+    const result = parseProjectForm(formData({ lighting: "disco" }));
+
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.errors.lighting).toBeDefined();
+  });
+
+  it("rejects a model offset outside the stage limits", () => {
+    const result = parseProjectForm(formData({ modelOffsetX: "40" }));
+
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.errors.modelOffsetX).toBeDefined();
+  });
 });

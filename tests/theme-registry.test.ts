@@ -22,4 +22,11 @@ describe("theme registry", () => {
   it("only the default theme owns the landing layout", () => {
     expect(themes[defaultThemeSlug].Landing).toBeTypeOf("function");
   });
+
+  it("registers the Anime 3D theme for project pages", () => {
+    expect(themes.anime.slug).toBe("anime");
+    expect(themes.anime.ProjectPage).toBeTypeOf("function");
+    expect(themes.anime.Landing).toBeUndefined();
+    expect(getTheme("anime").slug).toBe("anime");
+  });
 });

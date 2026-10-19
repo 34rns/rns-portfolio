@@ -38,11 +38,17 @@ export function SmartImage({ src, alt, className, sizes, priority, fill }: Smart
 
   return (
     // Admin-entered URLs can point anywhere, so the optimizer is skipped.
+    // Uploaded files arrive as absolute Blob URLs; keep `fill` working for them.
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src}
       alt={alt}
       className={className}
+      style={
+        fill
+          ? { position: "absolute", inset: 0, width: "100%", height: "100%" }
+          : undefined
+      }
       loading={priority ? "eager" : "lazy"}
       decoding="async"
     />

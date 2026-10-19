@@ -2,14 +2,17 @@
 
 A statically generated portfolio where every project page renders through its
 own theme. Phases 1–2 ship the platform, the admin panel, the Professional
-theme, visitor accounts and provider-agnostic payments.
+theme, visitor accounts and provider-agnostic payments; Phase 3 adds uploaded
+3D models and the Anime 3D theme.
 
 Live: https://rns-portfolio-teal.vercel.app
 
 ## Stack
 
 - Next.js 16 (App Router), TypeScript, Tailwind CSS v4
-- Motion (Framer Motion) for interaction; no 3D bundle yet
+- Motion (Framer Motion) for interaction; three.js via React Three Fiber for
+  the 3D stage, loaded only when a theme renders one and the device can afford it
+- Uploads through one adapter: local disk in development, Vercel Blob in production
 - Neon Postgres via the Vercel Marketplace, Drizzle ORM + `neon-http`
 - Auth.js v5: an admin credential and separate visitor accounts
 - Payments behind one interface: mock (local), Polar, Lemon Squeezy
@@ -34,13 +37,16 @@ src/app/admin             auth-guarded editor, dashboard and draft preview
 src/app/(site)/account    visitor signup, login and purchases
 src/app/api               auth, checkout, entitlement, payment webhooks
 src/lib/db                schema, client, retrying queries
-src/lib/projects          slug, order, validation, revalidation
+src/lib/projects          slug, order, validation, revalidation, 3D model data
 src/lib/auth              guard, rate limit, password hashing, sessions
 src/lib/payments          provider adapters, webhook engine, entitlements
+src/lib/uploads           upload policy + sniffing, storage adapters
+src/components/model-stage lazy three.js viewer with a poster fallback
 src/themes                registry + one folder per theme
   professional/           landing, project page, tokens, preview, motion
+  anime/                  manga project page, cel-shaded stage, scoped CSS
 scripts/                  migrate, seed, password hash
-tests/                    auth guard, revalidation, validation, registry
+tests/                    auth guard, revalidation, validation, registry, uploads
 ```
 
 ### Adding a theme
@@ -52,6 +58,20 @@ tests/                    auth guard, revalidation, validation, registry
 The admin theme picker, project renderer and preview all pick it up
 automatically.
 
+### The 3D stage
+
+`ProjectView.model` (`url`, `lighting`, `scale`, `offset`) is filled from the
+project row, so a theme can render `<ModelStage />` without knowing anything
+about storage. Every model is centered and auto-fitted to about 70% of the stage
+height, whatever units its exporter used; the admin scale and offset multiply on
+top of that fit. The stage loads three.js only when it nears the viewport, keeps
+rendering paused off-screen, and shows the cover plus a one-click opt-in for
+visitors with reduced motion or a low-power device. Projects without a model
+fall back to a built-in scene, so a theme can ship before any asset exists.
+
+Lighting presets live in `src/lib/projects/model.ts` as plain data; the admin
+picker and the viewer share them.
+
 ## Local development
 
 ```bash
@@ -59,7 +79,7 @@ npm install
 vercel link --project rns-portfolio
 vercel env pull .env.local          # DATABASE_URL + Neon vars
 npm run db:migrate
-npm run db:seed                     # four real projects, rerunnable
+npm run db:seed                     # four real projects, rerunnable; RISE uses Anime 3D
 npm run dev
 ```
 
@@ -72,6 +92,8 @@ ADMIN_PASSWORD_HASH=...             # npm run admin:hash -- "your-password"
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 PAYMENT_PROVIDER=mock               # mock | polar | lemonsqueezy
 MOCK_PAYMENT_SECRET=local-mock-secret
+# Optional: uploads default to ./uploads and need no configuration locally
+# BLOB_READ_WRITE_TOKEN=...         # set to use Vercel Blob instead
 ```
 
 Log in at `/admin/login`. `.env.example` documents every variable.
@@ -148,8 +170,14 @@ deploys production from `vercel --prod` or from a merged pull request.
   immediately; unlisted projects stay reachable by direct link and are excluded
   from the sitemap.
 - **Reorder:** admin → Projects → Move up/down. Order is stored in `sortOrder`.
-- **Images:** cover and gallery accept a URL or a path inside `/public`.
-  Vercel Blob uploads arrive in Phase 2/3.
+- **Uploads:** cover, gallery and 3D model fields accept a URL, a path inside
+  `/public`, or a direct upload. The browser and the server both sniff the
+  bytes; images cap at 8 MB, `.glb`/`.gltf` at 40 MB, and glTF files must embed
+  their buffers and textures. Without a Blob token files land in `./uploads`
+  (gitignored) and are served by `/api/uploads`.
+- **3D models:** open a project, choose a theme that renders the stage (Anime
+  3D), then upload a `.glb`, pick a lighting preset and tune scale/offset. The
+  draft preview renders the real stage before publishing.
 - **Payments:** set the project's paid toggle, price, currency and provider
   product id, plus a delivery note for buyers. Checkout is live once
   `PAYMENT_PROVIDER` points at a configured provider.
@@ -160,6 +188,7 @@ deploys production from `vercel --prod` or from a merged pull request.
 - Local pass — mobile header de-duplicated, deploy steps documented. **Done.**
 - Phase 2 — mock/Polar/Lemon Squeezy payments, visitor accounts, paid project
   flow, webhook idempotency, admin revenue. **Done locally, not deployed.**
-- Phase 3 — 3D model upload and the Anime 3D theme.
+- Phase 3 — 3D model upload, shared model stage, Anime 3D theme. **Done
+  locally, not deployed.** See [phase-3-handoff.md](docs/phase-3-handoff.md).
 - Phase 4 — remaining themes, one brief at a time.
 - Phase 5 — performance, accessibility, SEO and QA pass.

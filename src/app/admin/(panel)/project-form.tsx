@@ -4,8 +4,10 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useActionState, useState } from "react";
+import { LIGHTING_PRESETS, MODEL_LIMITS } from "@/lib/projects/model";
 import { slugify } from "@/lib/projects/slug";
 import { saveProject, type FormState } from "../actions";
+import { MediaField, UploadField } from "./upload-field";
 
 export type ThemeChoice = {
   slug: string;
@@ -36,6 +38,12 @@ export type ProjectFormValues = {
   price: string;
   currency: string;
   providerProductId: string;
+  modelUrl: string;
+  lighting: string;
+  modelScale: number;
+  modelOffsetX: number;
+  modelOffsetY: number;
+  modelOffsetZ: number;
   deliveryNote: string;
   sortOrder: number;
 };
@@ -59,6 +67,12 @@ export const emptyProject: ProjectFormValues = {
   price: "",
   currency: "USD",
   providerProductId: "",
+  modelUrl: "",
+  lighting: "studio",
+  modelScale: 1,
+  modelOffsetX: 0,
+  modelOffsetY: 0,
+  modelOffsetZ: 0,
   deliveryNote: "",
   sortOrder: 0,
 };
@@ -75,9 +89,11 @@ function FieldError({ message }: { message?: string }) {
 export function ProjectForm({
   project = emptyProject,
   themes,
+  directUploads = false,
 }: {
   project?: ProjectFormValues;
   themes: ThemeChoice[];
+  directUploads?: boolean;
 }) {
   const [state, action, pending] = useActionState(saveProject, {} as FormState);
   const [title, setTitle] = useState(project.title);
@@ -85,6 +101,8 @@ export function ProjectForm({
   const [slugTouched, setSlugTouched] = useState(Boolean(project.slug));
   const [description, setDescription] = useState(project.description);
   const [cover, setCover] = useState(project.coverImageUrl);
+  const [gallery, setGallery] = useState(project.gallery);
+  const [modelUrl, setModelUrl] = useState(project.modelUrl);
   const [theme, setTheme] = useState(project.theme);
   const [accent, setAccent] = useState(project.themeAccent);
   const [isPaid, setIsPaid] = useState(project.isPaid);
@@ -254,16 +272,14 @@ export function ProjectForm({
               </div>
 
               <div>
-                <label className="admin-label" htmlFor="coverImageUrl">
-                  Cover image URL
-                </label>
-                <input
-                  className="admin-field"
-                  id="coverImageUrl"
-                  name="coverImageUrl"
-                  defaultValue={project.coverImageUrl}
-                  onChange={(event) => setCover(event.target.value)}
-                  placeholder="/seed/example.png or https://..."
+                <MediaField
+                  label="Cover image"
+                  fieldName="coverImageUrl"
+                  kind="image"
+                  value={cover}
+                  onChange={setCover}
+                  direct={directUploads}
+                  hint="Paste a URL, or upload straight into this project."
                 />
                 <FieldError message={errors.coverImageUrl} />
                 {cover ? (
@@ -287,8 +303,21 @@ export function ProjectForm({
                   id="gallery"
                   name="gallery"
                   rows={3}
-                  defaultValue={project.gallery}
+                  value={gallery}
+                  onChange={(event) => setGallery(event.target.value)}
                 />
+                <div className="mt-2">
+                  <UploadField
+                    kind="image"
+                    direct={directUploads}
+                    buttonLabel="Upload to gallery"
+                    onUploaded={(url) =>
+                      setGallery((current) =>
+                        current.trim() ? `${current.trimEnd()}\n${url}` : url,
+                      )
+                    }
+                  />
+                </div>
                 <FieldError message={errors.gallery} />
               </div>
 
@@ -305,6 +334,101 @@ export function ProjectForm({
                 />
                 <FieldError message={errors.tags} />
               </div>
+            </div>
+          </section>
+
+          <section className="border border-[#E1E1DA] bg-white p-5">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="text-sm font-medium">3D model</h2>
+              <span className="mono text-[#6B6B64]">Optional</span>
+            </div>
+            <p className="mt-1 text-xs leading-relaxed text-[#6B6B64]">
+              The Anime 3D theme renders this in a live stage. Without a model
+              it shows a built-in scene. Other themes ignore these fields.
+            </p>
+
+            <div className="mt-4 grid gap-4">
+              <MediaField
+                label="Main 3D model"
+                fieldName="modelUrl"
+                kind="model"
+                value={modelUrl}
+                onChange={setModelUrl}
+                direct={directUploads}
+                hint="GLB preferred. A .gltf is only accepted when its buffers and textures are embedded."
+              />
+              <FieldError message={errors.modelUrl} />
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="admin-label" htmlFor="lighting">
+                    Lighting
+                  </label>
+                  <select
+                    className="admin-field"
+                    id="lighting"
+                    name="lighting"
+                    defaultValue={project.lighting}
+                  >
+                    {LIGHTING_PRESETS.map((preset) => (
+                      <option key={preset.id} value={preset.id}>
+                        {preset.label} — {preset.blurb}
+                      </option>
+                    ))}
+                  </select>
+                  <FieldError message={errors.lighting} />
+                </div>
+
+                <div>
+                  <label className="admin-label" htmlFor="modelScale">
+                    Scale
+                  </label>
+                  <input
+                    className="admin-field"
+                    id="modelScale"
+                    name="modelScale"
+                    type="number"
+                    step="0.05"
+                    min={MODEL_LIMITS.scale.min}
+                    max={MODEL_LIMITS.scale.max}
+                    defaultValue={project.modelScale}
+                  />
+                  <FieldError message={errors.modelScale} />
+                </div>
+              </div>
+
+              <fieldset>
+                <legend className="admin-label">Offset</legend>
+                <div className="grid grid-cols-3 gap-3">
+                  {(
+                    [
+                      ["modelOffsetX", "X", project.modelOffsetX],
+                      ["modelOffsetY", "Y", project.modelOffsetY],
+                      ["modelOffsetZ", "Z", project.modelOffsetZ],
+                    ] as const
+                  ).map(([name, axis, value]) => (
+                    <div key={name}>
+                      <label className="sr-only" htmlFor={name}>
+                        Offset {axis}
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="mono text-[#6B6B64]">{axis}</span>
+                        <input
+                          className="admin-field"
+                          id={name}
+                          name={name}
+                          type="number"
+                          step="0.05"
+                          min={MODEL_LIMITS.offset.min}
+                          max={MODEL_LIMITS.offset.max}
+                          defaultValue={value}
+                        />
+                      </div>
+                      <FieldError message={errors[name]} />
+                    </div>
+                  ))}
+                </div>
+              </fieldset>
             </div>
           </section>
         </div>

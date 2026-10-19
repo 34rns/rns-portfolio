@@ -45,6 +45,9 @@ next-env.d.ts
 
 .admin-credentials.txt
 
+# Local upload storage (development driver)
+/uploads
+
 # Local test artifacts
 .auth-test.jar
 
