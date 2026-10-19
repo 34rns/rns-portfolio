@@ -173,6 +173,7 @@ export function ModelStage({
               alt=""
               fill
               sizes="(min-width: 1024px) 46vw, 100vw"
+              priority
               className="object-cover"
             />
           ) : (
