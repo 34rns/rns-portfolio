@@ -6,5 +6,8 @@ export async function requireAdmin() {
   if (!session?.user) {
     redirect("/admin/login");
   }
+  if (session.user.role !== "admin") {
+    redirect("/account/purchases");
+  }
   return session.user;
 }

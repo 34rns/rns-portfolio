@@ -1,5 +1,4 @@
 import type { NextAuthConfig } from "next-auth";
-import { isAuthorized } from "./guard";
 
 export const authConfig = {
   pages: {
@@ -11,12 +10,6 @@ export const authConfig = {
   trustHost: true,
   providers: [],
   callbacks: {
-    authorized({ auth, request }) {
-      return isAuthorized({
-        pathname: request.nextUrl.pathname,
-        isLoggedIn: Boolean(auth?.user),
-      });
-    },
     jwt({ token, user }) {
       if (user) {
         const role = (user as { role?: "admin" | "customer" }).role ?? "admin";
@@ -27,6 +20,7 @@ export const authConfig = {
     session({ session, token }) {
       if (session.user) {
         session.user.role = token.role === "customer" ? "customer" : "admin";
+        if (token.sub) session.user.id = token.sub;
       }
       return session;
     },
