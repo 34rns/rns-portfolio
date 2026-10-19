@@ -70,6 +70,62 @@ body {
   letter-spacing: 0.015em;
 }
 
+@keyframes hero-rise {
+  from {
+    transform: translateY(106%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes hero-settle {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-title {
+  animation: hero-rise 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-rule {
+  transform-origin: left;
+  animation: hero-line 1s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+}
+
+.hero-settle {
+  animation: hero-settle 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
+.hero-settle-late {
+  animation-delay: 0.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-title,
+  .hero-rule,
+  .hero-settle {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .nav-link {
   position: relative;
 }
