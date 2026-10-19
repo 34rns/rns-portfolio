@@ -1,8 +1,8 @@
 # RNS — portfolio and project showcase
 
 A statically generated portfolio where every project page renders through its
-own theme. Phase 1 ships the platform, the admin panel, and the Professional
-theme.
+own theme. Phases 1–2 ship the platform, the admin panel, the Professional
+theme, visitor accounts and provider-agnostic payments.
 
 Live: https://rns-portfolio-teal.vercel.app
 
@@ -11,7 +11,8 @@ Live: https://rns-portfolio-teal.vercel.app
 - Next.js 16 (App Router), TypeScript, Tailwind CSS v4
 - Motion (Framer Motion) for interaction; no 3D bundle yet
 - Neon Postgres via the Vercel Marketplace, Drizzle ORM + `neon-http`
-- Auth.js v5 credentials for the single admin account
+- Auth.js v5: an admin credential and separate visitor accounts
+- Payments behind one interface: mock (local), Polar, Lemon Squeezy
 - Vitest for the critical-path unit tests
 - Vercel for hosting, SSG/ISR for every public page
 
@@ -30,10 +31,12 @@ Live: https://rns-portfolio-teal.vercel.app
 ```
 src/app/(site)            public, statically generated pages
 src/app/admin             auth-guarded editor, dashboard and draft preview
-src/app/api/auth          Auth.js handlers
+src/app/(site)/account    visitor signup, login and purchases
+src/app/api               auth, checkout, entitlement, payment webhooks
 src/lib/db                schema, client, retrying queries
 src/lib/projects          slug, order, validation, revalidation
-src/lib/auth              edge-safe guard config, password hashing
+src/lib/auth              guard, rate limit, password hashing, sessions
+src/lib/payments          provider adapters, webhook engine, entitlements
 src/themes                registry + one folder per theme
   professional/           landing, project page, tokens, preview, motion
 scripts/                  migrate, seed, password hash
@@ -67,9 +70,28 @@ AUTH_SECRET=...                     # node -e "console.log(require('crypto').ran
 ADMIN_EMAIL=you@example.com
 ADMIN_PASSWORD_HASH=...             # npm run admin:hash -- "your-password"
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+PAYMENT_PROVIDER=mock               # mock | polar | lemonsqueezy
+MOCK_PAYMENT_SECRET=local-mock-secret
 ```
 
 Log in at `/admin/login`. `.env.example` documents every variable.
+
+## Payments and accounts
+
+- Providers implement `createCheckout`, `verifyWebhook`, `parseEvent` and an
+  optional `getCustomerPortal`; `PAYMENT_PROVIDER` chooses the adapter.
+- `mock` is the default with no keys. A paid project's Buy button opens a local
+  checkout page whose buttons post HMAC-signed events to
+  `/api/webhooks/payments/mock`, so the grant runs through the real handler.
+- Polar and Lemon Squeezy adapters are wired; add the keys from
+  `.env.example` and switch `PAYMENT_PROVIDER`.
+- Visitors sign up at `/account/signup`; purchases are listed at
+  `/account/purchases`. Admin sessions and visitor sessions share Auth.js but
+  carry different roles, and `/admin` requires the admin role.
+- Webhooks are verified against the raw body, deduplicated in
+  `processed_webhook_events`, and only a `paid` purchase unlocks the live URL
+  and delivery note. Project pages stay static; the panel fetches entitlement
+  client-side.
 
 ## Deploying later
 
@@ -128,14 +150,16 @@ deploys production from `vercel --prod` or from a merged pull request.
 - **Reorder:** admin → Projects → Move up/down. Order is stored in `sortOrder`.
 - **Images:** cover and gallery accept a URL or a path inside `/public`.
   Vercel Blob uploads arrive in Phase 2/3.
-- **Payments:** fields and the provider interface exist; checkout is hidden
-  until Phase 2. No payment SDK is installed.
+- **Payments:** set the project's paid toggle, price, currency and provider
+  product id, plus a delivery note for buyers. Checkout is live once
+  `PAYMENT_PROVIDER` points at a configured provider.
 
 ## Phases
 
 - Phase 1 — platform, auth, admin CRUD, Professional theme, deploy. **Done.**
 - Local pass — mobile header de-duplicated, deploy steps documented. **Done.**
-- Phase 2 — payments, visitor signup, paid project flow.
+- Phase 2 — mock/Polar/Lemon Squeezy payments, visitor accounts, paid project
+  flow, webhook idempotency, admin revenue. **Done locally, not deployed.**
 - Phase 3 — 3D model upload and the Anime 3D theme.
 - Phase 4 — remaining themes, one brief at a time.
 - Phase 5 — performance, accessibility, SEO and QA pass.
