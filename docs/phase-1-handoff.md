@@ -40,6 +40,16 @@ status, amount, currency, timestamps) and `processed_webhook_events` with unique
 `(provider, event_id)`, plus `projects.delivery_note`. Migration `0001` is
 additive and applied to the shared database.
 
+**Admin orders.** `/admin/orders` lists every checkout attempt with buyer,
+project, provider, status and amount, filterable by status and paged 50 at a
+time, with the signup, paid-order and revenue totals above it. Admins can grant access to a visitor
+account (creating a $0 row with the `manual` provider rather than rewriting an
+earlier attempt) or revoke a paid order, which flips it to `refunded` and locks
+the gated content on the next request. Every grant and revoke writes an
+append-only row to `purchase_audit_log` (migration `0002`) with the actor's
+email, buyer, project title, amount and optional reason; the page shows the last
+20. Comped rows stay out of revenue and paid-order counts.
+
 **Visitor accounts.** Same Auth.js instance with separate `admin` and `visitor`
 providers; visitors live in `users` with scrypt hashes and `role = customer`.
 The guard now requires `role === "admin"` for `/admin` and a session for
@@ -56,7 +66,7 @@ by currency.
 
 ## Verified locally
 
-- `npm run lint`, `npm run typecheck`, `npm test` (60 tests across 14 files) and
+- `npm run lint`, `npm run typecheck`, `npm test` (68 tests across 15 files) and
   `npm run build` all clean; project pages still build as `●` SSG.
 - Mock journey in the browser: guest sees the price and "Create an account to
   buy"; signup signs the visitor in and returns to the project; buy opens the
@@ -76,6 +86,15 @@ by currency.
   secret forms; idempotency, refund revocation, entitlement hiding, rate-limit
   windows, signup validation, checkout refusals and the full mock checkout are
   covered by unit tests.
+- Admin orders, in the browser against the real database: a published project
+  was temporarily put on sale, a visitor signed up, the admin granted access
+  (order row `PAID`, `manual`, `Comped`, audit row `GRANT` with the admin email
+  and reason). The buyer's project page then showed the live link and delivery
+  note. Revoking from the same page flipped the row to `REFUNDED`, appended a
+  `REVOKE` audit row with its reason, and the buyer's reload showed the price
+  again with no live URL or note in the DOM. An unknown email produced the
+  inline error, and the audit trail listed both actions. The temporary sale,
+  test account, purchases and audit rows were removed afterwards.
 - Temporary demo project and test account were deleted after the run; the
   database is back to the four seeded projects and no customer accounts.
 
