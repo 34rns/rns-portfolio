@@ -24,6 +24,9 @@
 - Create → publish → live landing → delete, each reflected without a redeploy.
 - Unlisted project reachable by URL, absent from the sitemap.
 - No horizontal overflow at 1440px or 390px; mobile covers render.
+- Production serves `X-Vercel-Cache: HIT` on `/` and project pages.
+- Lighthouse mobile (two runs): performance 91–92, accessibility 100,
+  best practices 100, SEO 100. LCP 3.0–3.2s, CLS 0.
 
 ## Only you can do
 
