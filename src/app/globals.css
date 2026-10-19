@@ -1,0 +1,325 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  --theme-bg: #e9eae4;
+  --theme-surface: #f2f2ec;
+  --theme-text: #14171a;
+  --theme-muted: #5c615e;
+  --theme-accent: #1b3bff;
+  --theme-accent-text: #f7f8f4;
+  --theme-line: rgba(20, 23, 26, 0.16);
+  --theme-radius: 2px;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  font-family: var(--font-newsreader), Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--theme-accent);
+  color: var(--theme-accent-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--theme-accent);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+.display {
+  font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  font-variation-settings: "wdth" 116;
+  letter-spacing: -0.035em;
+  line-height: 0.92;
+  text-wrap: balance;
+}
+
+.mono {
+  font-family: var(--font-dm-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  letter-spacing: 0.015em;
+}
+
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-link:hover::after,
+.nav-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 1rem;
+  z-index: 200;
+  background: var(--theme-accent);
+  color: var(--theme-accent-text);
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Intro overlay: CSS-driven so it never blocks hydration. */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  background: var(--theme-bg);
+  animation: intro-out 0.55s cubic-bezier(0.7, 0, 0.2, 1) 0.85s forwards;
+}
+
+html.intro-skip .intro {
+  display: none;
+}
+
+.intro-mark {
+  font-size: clamp(3rem, 10vw, 7rem);
+  color: var(--theme-text);
+}
+
+.intro-rule {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  width: min(220px, 46vw);
+  height: 1px;
+  background: var(--theme-line);
+  overflow: hidden;
+  transform: translateX(-50%);
+}
+
+.intro-rule::after {
+  content: "";
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--theme-accent);
+  transform-origin: left;
+  animation: intro-load 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes intro-load {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes intro-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro {
+    display: none;
+  }
+}
+
+.cursor-dot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 110;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--theme-accent);
+  pointer-events: none;
+  display: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cursor-dot {
+    display: none !important;
+  }
+}
+
+.editorial {
+  color: var(--theme-text);
+}
+
+.editorial > * + * {
+  margin-top: 1.15em;
+}
+
+.editorial p,
+.editorial li {
+  font-size: 1.13rem;
+  line-height: 1.78;
+}
+
+.editorial h2 {
+  font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  font-variation-settings: "wdth" 112;
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-top: 2.4em;
+}
+
+.editorial h3 {
+  font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  margin-top: 2em;
+}
+
+.editorial ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.editorial ul > li {
+  position: relative;
+  padding-left: 1.4em;
+}
+
+.editorial ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.82em;
+  width: 8px;
+  height: 1px;
+  background: var(--theme-accent);
+}
+
+.editorial ol {
+  padding-left: 1.3em;
+}
+
+.editorial ol > li {
+  padding-left: 0.3em;
+}
+
+.editorial a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.editorial a:hover {
+  color: var(--theme-accent);
+}
+
+.editorial blockquote {
+  border-left: 2px solid var(--theme-accent);
+  padding-left: 1.2em;
+  font-style: italic;
+  color: var(--theme-muted);
+}
+
+.editorial code {
+  font-family: var(--font-dm-mono), ui-monospace, monospace;
+  font-size: 0.85em;
+  background: var(--theme-surface);
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+}
+
+.editorial pre {
+  background: #101314;
+  color: #e9eae4;
+  padding: 1.2rem 1.4rem;
+  overflow-x: auto;
+  border-radius: var(--theme-radius);
+}
+
+.editorial pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.82rem;
+}
+
+.editorial img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--theme-radius);
+}
+
+.editorial hr {
+  border: 0;
+  border-top: 1px solid var(--theme-line);
+}
+
+/* Admin */
+.admin-field {
+  width: 100%;
+  border: 1px solid #d8d8d2;
+  background: #fff;
+  padding: 0.6rem 0.7rem;
+  font-size: 0.92rem;
+  border-radius: 4px;
+  color: #14171a;
+  font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+}
+
+.admin-field:focus {
+  outline: 2px solid #1b3bff;
+  outline-offset: 1px;
+}
+
+.admin-label {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b6b64;
+  margin-bottom: 0.35rem;
+  font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+}
