@@ -101,14 +101,15 @@ Web work teaches you to respect frame budgets. Shader work teaches you what actu
     title: "WorkWing",
     tagline: "A focus timer that stays out of the way.",
     year: 2025,
-    theme: "professional" as const,
+    theme: "synthwave" as const,
     tags: ["HTML", "CSS", "JavaScript"],
     liveUrl: null,
     repoUrl: "https://github.com/34rns/WorkWing",
     coverImageUrl: null,
     placement: "unlisted" as const,
     sortOrder: 3,
-    themeOptions: { accent: "#6B4BD6" },
+    themeOptions: {},
+    lighting: "neon" as const,
     description: `## A small tool, finished
 
 WorkWing is a single-page focus timer with stopwatch, countdown and Pomodoro modes, built to feel calm instead of noisy.

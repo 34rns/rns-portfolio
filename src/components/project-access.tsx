@@ -113,7 +113,7 @@ export function ProjectAccess({
             type="button"
             onClick={buy}
             disabled={busy}
-            className="bg-[var(--theme-text)] px-5 py-3 text-sm text-[var(--theme-background)] transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="bg-[var(--theme-text)] px-5 py-3 text-sm text-[var(--theme-bg)] transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {busy ? "Opening checkout…" : `Buy for ${priceLabel}`}
           </button>
@@ -122,7 +122,7 @@ export function ProjectAccess({
         {!loading && !entitlement?.purchased && !entitlement?.authenticated ? (
           <Link
             href={`/account/signup?next=${encodeURIComponent(`/projects/${slug}`)}`}
-            className="bg-[var(--theme-text)] px-5 py-3 text-sm text-[var(--theme-background)] transition-opacity hover:opacity-90"
+            className="bg-[var(--theme-text)] px-5 py-3 text-sm text-[var(--theme-bg)] transition-opacity hover:opacity-90"
           >
             Create an account to buy
           </Link>

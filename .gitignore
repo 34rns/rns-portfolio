@@ -56,3 +56,6 @@ next-env.d.ts
 .claude/
 skills-lock.json
 !.env.example
+
+# Local review screenshots
+/screenshots/

@@ -3,7 +3,7 @@
 A statically generated portfolio where every project page renders through its
 own theme. Phases 1–2 ship the platform, the admin panel, the Professional
 theme, visitor accounts and provider-agnostic payments; Phase 3 adds uploaded
-3D models and the Anime 3D theme.
+3D models and the Anime 3D theme; Phase 4 adds the Synthwave theme.
 
 Live: https://rns-portfolio-teal.vercel.app
 
@@ -45,6 +45,7 @@ src/components/model-stage lazy three.js viewer with a poster fallback
 src/themes                registry + one folder per theme
   professional/           landing, project page, tokens, preview, motion
   anime/                  manga project page, cel-shaded stage, scoped CSS
+  synthwave/              neon CRT project page, grid scene, boot sequence
 scripts/                  migrate, seed, password hash
 tests/                    auth guard, revalidation, validation, registry, uploads
 ```
@@ -79,7 +80,7 @@ npm install
 vercel link --project rns-portfolio
 vercel env pull .env.local          # DATABASE_URL + Neon vars
 npm run db:migrate
-npm run db:seed                     # four real projects, rerunnable; RISE uses Anime 3D
+npm run db:seed                     # four real projects, rerunnable; WorkWing uses Synthwave
 npm run dev
 ```
 
@@ -176,8 +177,8 @@ deploys production from `vercel --prod` or from a merged pull request.
   their buffers and textures. Without a Blob token files land in `./uploads`
   (gitignored) and are served by `/api/uploads`.
 - **3D models:** open a project, choose a theme that renders the stage (Anime
-  3D), then upload a `.glb`, pick a lighting preset and tune scale/offset. The
-  draft preview renders the real stage before publishing.
+  3D, Synthwave), then upload a `.glb`, pick a lighting preset and tune
+  scale/offset. The draft preview renders the real stage before publishing.
 - **Payments:** set the project's paid toggle, price, currency and provider
   product id, plus a delivery note for buyers. Checkout is live once
   `PAYMENT_PROVIDER` points at a configured provider.
@@ -190,5 +191,6 @@ deploys production from `vercel --prod` or from a merged pull request.
   flow, webhook idempotency, admin revenue. **Done locally, not deployed.**
 - Phase 3 — 3D model upload, shared model stage, Anime 3D theme. **Done
   locally, not deployed.** See [phase-3-handoff.md](docs/phase-3-handoff.md).
-- Phase 4 — remaining themes, one brief at a time.
+- Phase 4 — Synthwave theme. **Done locally, not deployed.** See
+  [synthwave.md](docs/design/synthwave.md). Further themes, one brief at a time.
 - Phase 5 — performance, accessibility, SEO and QA pass.
