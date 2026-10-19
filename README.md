@@ -4,7 +4,7 @@ A statically generated portfolio where every project page renders through its
 own theme. Phase 1 ships the platform, the admin panel, and the Professional
 theme.
 
-Live: https://rns-portfolio.vercel.app
+Live: https://rns-portfolio-teal.vercel.app
 
 ## Stack
 
