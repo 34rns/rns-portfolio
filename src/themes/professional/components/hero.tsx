@@ -17,7 +17,7 @@ export function Hero({ latest }: { latest?: ProjectView }) {
           className="display text-[clamp(5.4rem,21vw,20rem)] font-semibold"
           initial={reduce ? false : { y: "106%" }}
           animate={{ y: 0 }}
-          transition={{ duration: 1.15, ease }}
+          transition={{ duration: 0.9, ease }}
         >
           RNS
           <span className="sr-only"> — {site.role}</span>
@@ -35,17 +35,17 @@ export function Hero({ latest }: { latest?: ProjectView }) {
       <div className="mt-7 grid gap-6 md:grid-cols-12 md:gap-10">
         <motion.p
           className="text-[1.32rem] leading-[1.4] md:col-span-5 md:text-[1.55rem]"
-          initial={reduce ? false : { opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.45, ease }}
+          initial={reduce ? false : { y: 10 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.7, delay: 0.1, ease }}
         >
           {site.role}.
         </motion.p>
         <motion.p
           className="max-w-[52ch] text-[1.06rem] leading-[1.7] text-[var(--theme-muted)] md:col-span-6 md:col-start-7"
-          initial={reduce ? false : { opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.55, ease }}
+          initial={reduce ? false : { y: 10 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.7, delay: 0.15, ease }}
         >
           I design and build web products end to end — storefronts, tools, and the
           occasional game. Currently working with Next.js, TypeScript, and Postgres.

@@ -115,7 +115,7 @@ body {
   display: grid;
   place-items: center;
   background: var(--theme-bg);
-  animation: intro-out 0.55s cubic-bezier(0.7, 0, 0.2, 1) 0.85s forwards;
+  animation: intro-out 0.22s cubic-bezier(0.7, 0, 0.2, 1) 0.12s forwards;
 }
 
 html.intro-skip .intro {
@@ -145,7 +145,7 @@ html.intro-skip .intro {
   width: 100%;
   background: var(--theme-accent);
   transform-origin: left;
-  animation: intro-load 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: intro-load 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes intro-load {
