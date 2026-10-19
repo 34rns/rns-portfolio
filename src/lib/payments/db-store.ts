@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, ne, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { projects, purchases, users } from "@/lib/db/schema";
 import { withRetry } from "@/lib/db/queries";
@@ -150,7 +150,8 @@ export const dbStore: PaymentStore = {
             orders: sql<number>`count(*)::int`,
           })
           .from(purchases)
-          .where(eq(purchases.status, "paid"))
+          // Comped access is a $0 manual row; it is not revenue or an order.
+          .where(and(eq(purchases.status, "paid"), ne(purchases.provider, "manual")))
           .groupBy(purchases.currency),
       ),
     ]);

@@ -106,7 +106,9 @@ export function createMemoryStore({
         });
     },
     async commerceStats() {
-      const paid = [...purchases.values()].filter((purchase) => purchase.status === "paid");
+      const paid = [...purchases.values()].filter(
+        (purchase) => purchase.status === "paid" && purchase.provider !== "manual",
+      );
       const revenue = new Map<string, number>();
       for (const purchase of paid) {
         revenue.set(

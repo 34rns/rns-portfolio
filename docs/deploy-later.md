@@ -41,13 +41,15 @@ The Neon database already exists. On a new database:
 
 ```bash
 vercel env pull .env.local
-npm run db:migrate     # 0000 projects/users, 0001 purchases + webhook ledger
+npm run db:migrate     # 0000 projects/users, 0001 purchases + webhook ledger, 0002 audit log
 npm run db:seed        # optional demo projects
 ```
 
 New tables in Phase 2: `purchases`, `processed_webhook_events`, the
-`purchase_status` enum, and `projects.delivery_note`. Nothing was dropped or
-renamed, so existing production rows are untouched.
+`purchase_status` enum, and `projects.delivery_note` (migration `0001`).
+Migration `0002` adds `purchase_audit_log` and the `purchase_audit_action` enum
+for manual grants and revokes. Both migrations are additive; nothing was
+dropped or renamed, so existing production rows are untouched.
 
 ## 4. Webhook endpoints
 
@@ -101,6 +103,10 @@ column, so history stays readable after a switch.
 6. View source on the paid project page while signed out: no live URL and no
    delivery note anywhere in the HTML.
 7. Admin Overview shows the real signup count and revenue.
+8. `/admin/orders` lists the order with buyer, project, provider, status and
+   amount. Grant a second test account access, confirm it unlocks on the project
+   page, then revoke it and confirm the page locks again — both actions should
+   appear in the audit trail with your admin email.
 
 ## 7. Not included
 
@@ -108,3 +114,5 @@ column, so history stays readable after a switch.
   work immediately after signup.
 - No Blob storage; cover and gallery still take URLs.
 - Rate limiting is in-memory per server instance, not a global limiter.
+- Comped (`manual`) orders are excluded from revenue and paid-order counts by
+  design; they are still listed and audited.

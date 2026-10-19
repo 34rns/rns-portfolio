@@ -21,6 +21,7 @@ export const purchaseStatus = pgEnum("purchase_status", [
   "failed",
   "refunded",
 ]);
+export const purchaseAuditAction = pgEnum("purchase_audit_action", ["grant", "revoke"]);
 
 export type ThemeOptions = {
   accent?: string;
@@ -120,8 +121,42 @@ export const processedWebhookEvents = pgTable(
   ],
 );
 
+/**
+ * Append-only record of manual access changes. Buyer and project details are
+ * copied in so the trail still reads correctly if a row is later renamed or
+ * removed.
+ */
+export const purchaseAuditLog = pgTable(
+  "purchase_audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    purchaseId: uuid("purchase_id")
+      .notNull()
+      .references(() => purchases.id, { onDelete: "cascade" }),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    buyerId: uuid("buyer_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    buyerEmail: text("buyer_email").notNull(),
+    projectTitle: text("project_title").notNull(),
+    actorEmail: text("actor_email").notNull(),
+    action: purchaseAuditAction("action").notNull(),
+    reason: text("reason"),
+    amountCents: integer("amount_cents").notNull(),
+    currency: text("currency").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("purchase_audit_log_created_idx").on(table.createdAt),
+    index("purchase_audit_log_purchase_idx").on(table.purchaseId),
+  ],
+);
+
 export type UserRecord = typeof users.$inferSelect;
 export type ProjectRecord = typeof projects.$inferSelect;
 export type NewProject = typeof projects.$inferInsert;
 export type PurchaseRecord = typeof purchases.$inferSelect;
 export type PurchaseStatus = (typeof purchaseStatus.enumValues)[number];
+export type PurchaseAuditRecord = typeof purchaseAuditLog.$inferSelect;

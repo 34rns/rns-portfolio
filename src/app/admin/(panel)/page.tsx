@@ -78,6 +78,9 @@ export default async function AdminDashboard() {
           <p className="mt-1 text-sm text-[#6B6B64]">
             {commerce.paidOrders} paid {commerce.paidOrders === 1 ? "order" : "orders"}
           </p>
+          <Link href="/admin/orders" className="mt-3 inline-block text-sm underline">
+            View orders
+          </Link>
         </div>
       </section>
     </div>

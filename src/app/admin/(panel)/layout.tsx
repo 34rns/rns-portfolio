@@ -34,6 +34,12 @@ export default async function PanelLayout({ children }: { children: React.ReactN
               New project
             </Link>
             <Link
+              href="/admin/orders"
+              className="px-2 py-1.5 hover:bg-[#E7E7E0]"
+            >
+              Orders
+            </Link>
+            <Link
               href="/"
               target="_blank"
               className="px-2 py-1.5 hover:bg-[#E7E7E0]"
