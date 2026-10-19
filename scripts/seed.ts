@@ -13,6 +13,7 @@ const seeds = [
     liveUrl: "https://moneykickshop1.vercel.app",
     repoUrl: "https://github.com/34rns/moneykickshop",
     coverImageUrl: null,
+    gallery: [],
     placement: "featured" as const,
     sortOrder: 0,
     themeOptions: {},
@@ -46,6 +47,7 @@ Payment verification is a product problem, not a form field. The checkout is des
     liveUrl: null,
     repoUrl: "https://github.com/34rns/RISE-Hunter-s-Ascent",
     coverImageUrl: null,
+    gallery: [],
     placement: "featured" as const,
     sortOrder: 1,
     themeOptions: { accent: "#D9482B" },
@@ -79,6 +81,7 @@ Most fitness apps ask for discipline. This one gives you a reason to come back: 
     liveUrl: null,
     repoUrl: "https://github.com/34rns/OfficeChaos",
     coverImageUrl: null,
+    gallery: [],
     placement: "featured" as const,
     sortOrder: 2,
     themeOptions: { accent: "#2E6B4F" },
@@ -106,6 +109,7 @@ Web work teaches you to respect frame budgets. Shader work teaches you what actu
     liveUrl: null,
     repoUrl: "https://github.com/34rns/WorkWing",
     coverImageUrl: null,
+    gallery: [],
     placement: "unlisted" as const,
     sortOrder: 3,
     themeOptions: {},
@@ -124,6 +128,41 @@ WorkWing is a single-page focus timer with stopwatch, countdown and Pomodoro mod
 ## Why it exists
 
 Sometimes the best portfolio piece is a small thing with no dependencies that just works. This one is HTML, CSS and JavaScript end to end.`,
+  },
+  {
+    slug: "ghostline-09",
+    title: "Ghostline 09",
+    tagline: "A courier dispatch console for the 03:00 shift.",
+    year: 2026,
+    theme: "cyberpunk" as const,
+    tags: ["Next.js", "WebGL", "Realtime", "TypeScript"],
+    liveUrl: null,
+    repoUrl: "https://github.com/34rns",
+    coverImageUrl: "/demo/ghostline-09.jpg",
+    gallery: ["/demo/signal-intercept.jpg", "/demo/payload-run.jpg"],
+    placement: "unlisted" as const,
+    sortOrder: 4,
+    themeOptions: {},
+    lighting: "neon" as const,
+    description: `## The brief
+
+A courier network runs on trust and timestamps. Ghostline is the console the dispatcher keeps open all night: who is carrying what, which route is live, and what has gone quiet.
+
+## What is inside
+
+- A live board of active runs with carrier, payload class and route
+- An optic feed that traces a run from pickup to drop
+- Signal health per node, with a dead channel called out instead of hidden
+- A dispatch log that keeps the handoff history readable at 03:00
+- Keyboard-first controls, because the desk is faster than the mouse
+
+## Stack
+
+Next.js App Router, TypeScript, WebGL for the route view, and a realtime channel feeding the board. The interface is deliberately quiet: near-black surfaces, one acid accent, and monospace for anything that could be mistaken for a number.
+
+## Why it matters
+
+Logistics tools usually fail at the handoff. This one treats every handoff as the primary screen: the payload, the carrier, the witness, the time. Everything else is decoration.`,
   },
 ];
 
@@ -161,6 +200,7 @@ async function main() {
           tagline: values.tagline,
           description: values.description,
           coverImageUrl: values.coverImageUrl,
+          gallery: values.gallery,
           tags: values.tags,
           liveUrl: values.liveUrl,
           repoUrl: values.repoUrl,
