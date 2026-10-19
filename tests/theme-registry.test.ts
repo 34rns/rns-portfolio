@@ -29,4 +29,11 @@ describe("theme registry", () => {
     expect(themes.anime.Landing).toBeUndefined();
     expect(getTheme("anime").slug).toBe("anime");
   });
+
+  it("registers the Synthwave theme for project pages", () => {
+    expect(themes.synthwave.slug).toBe("synthwave");
+    expect(themes.synthwave.ProjectPage).toBeTypeOf("function");
+    expect(themes.synthwave.Landing).toBeUndefined();
+    expect(getTheme("synthwave").slug).toBe("synthwave");
+  });
 });

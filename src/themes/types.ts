@@ -19,6 +19,8 @@ export type ProjectPageProps = {
   project: ProjectView;
   previous: ProjectLink | null;
   next: ProjectLink | null;
+  /** Other published projects, for themes that surface a related shelf. */
+  related?: ProjectLink[];
   /** Buyer-only access panel, rendered by the route so the theme only places it. */
   access?: ReactNode;
 };

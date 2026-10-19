@@ -53,6 +53,11 @@ export default async function ProjectPage({ params }: RouteParams) {
   const index = links.findIndex((link) => link.slug === project.slug);
   const candidate = index >= 0 ? links[(index + 1) % links.length] : undefined;
   const next = candidate && candidate.slug !== project.slug ? candidate : null;
+  // Extra published projects for themes that show a related shelf. Themes that
+  // do not use the prop ignore it; the page stays statically generated.
+  const related = links
+    .filter((link) => link.slug !== project.slug && link.slug !== next?.slug)
+    .slice(0, 3);
 
   const theme = getTheme(project.theme);
   const ProjectPage = theme.ProjectPage;
@@ -80,6 +85,7 @@ export default async function ProjectPage({ params }: RouteParams) {
         project={safeView}
         previous={null}
         next={next}
+        related={related}
         access={access}
       />
     </div>
