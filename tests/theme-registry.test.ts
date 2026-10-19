@@ -36,4 +36,11 @@ describe("theme registry", () => {
     expect(themes.synthwave.Landing).toBeUndefined();
     expect(getTheme("synthwave").slug).toBe("synthwave");
   });
+
+  it("registers the Cyberpunk theme for project pages", () => {
+    expect(themes.cyberpunk.slug).toBe("cyberpunk");
+    expect(themes.cyberpunk.ProjectPage).toBeTypeOf("function");
+    expect(themes.cyberpunk.Landing).toBeUndefined();
+    expect(getTheme("cyberpunk").slug).toBe("cyberpunk");
+  });
 });
