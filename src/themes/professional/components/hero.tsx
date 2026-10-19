@@ -1,64 +1,31 @@
-"use client";
-
 import Link from "next/link";
-import { motion, useReducedMotion } from "motion/react";
 import { site } from "@/content/site";
 import type { ProjectView } from "@/lib/projects/view";
 
-const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
-
 export function Hero({ latest }: { latest?: ProjectView }) {
-  const reduce = useReducedMotion();
-
   return (
     <section className="mx-auto mt-8 max-w-[1440px] px-5 md:mt-14 md:px-10">
       <div className="overflow-hidden">
-        <motion.h1
-          className="display text-[clamp(5.4rem,21vw,20rem)] font-semibold"
-          initial={reduce ? false : { y: "106%" }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.9, ease }}
-        >
+        <h1 className="display hero-title text-[clamp(5.4rem,21vw,20rem)] font-semibold">
           RNS
           <span className="sr-only"> — {site.role}</span>
-        </motion.h1>
+        </h1>
       </div>
 
-      <motion.div
-        aria-hidden="true"
-        className="mt-2 h-px w-full origin-left bg-[var(--theme-line)]"
-        initial={reduce ? false : { scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 1.2, delay: 0.25, ease }}
-      />
+      <div aria-hidden="true" className="hero-rule mt-2 h-px w-full bg-[var(--theme-line)]" />
 
       <div className="mt-7 grid gap-6 md:grid-cols-12 md:gap-10">
-        <motion.p
-          className="text-[1.32rem] leading-[1.4] md:col-span-5 md:text-[1.55rem]"
-          initial={reduce ? false : { y: 10 }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1, ease }}
-        >
+        <p className="hero-settle text-[1.32rem] leading-[1.4] md:col-span-5 md:text-[1.55rem]">
           {site.role}.
-        </motion.p>
-        <motion.p
-          className="max-w-[52ch] text-[1.06rem] leading-[1.7] text-[var(--theme-muted)] md:col-span-6 md:col-start-7"
-          initial={reduce ? false : { y: 10 }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.7, delay: 0.15, ease }}
-        >
+        </p>
+        <p className="hero-settle hero-settle-late max-w-[52ch] text-[1.06rem] leading-[1.7] text-[var(--theme-muted)] md:col-span-6 md:col-start-7">
           I design and build web products end to end — storefronts, tools, and the
           occasional game. Currently working with Next.js, TypeScript, and Postgres.
-        </motion.p>
+        </p>
       </div>
 
       {latest ? (
-        <motion.div
-          className="mt-12 flex flex-wrap items-baseline justify-between gap-3 border-t border-[var(--theme-line)] py-4 md:mt-16"
-          initial={reduce ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.9, delay: 0.8 }}
-        >
+        <div className="hero-settle hero-settle-late mt-12 flex flex-wrap items-baseline justify-between gap-3 border-t border-[var(--theme-line)] py-4 md:mt-16">
           <span className="mono text-[var(--theme-muted)]">Latest</span>
           <Link
             href={`/projects/${latest.slug}`}
@@ -68,7 +35,7 @@ export function Hero({ latest }: { latest?: ProjectView }) {
             {latest.title}
           </Link>
           <span className="mono text-[var(--theme-muted)]">{latest.year}</span>
-        </motion.div>
+        </div>
       ) : null}
     </section>
   );
