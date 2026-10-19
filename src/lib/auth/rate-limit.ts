@@ -48,6 +48,15 @@ export function createRateLimiter({
   };
 }
 
+/**
+ * The credential callback is the route an attacker posts to directly, so it is
+ * limited separately from the form actions that usually trigger it.
+ */
+export function authCallbackKey(pathname: string, ip: string): string | null {
+  if (!pathname.startsWith("/api/auth/callback/")) return null;
+  return `auth-callback:${ip}`;
+}
+
 export const authRateLimit: RateLimiter = createRateLimiter({
   limit: 10,
   windowMs: 10 * 60 * 1000,

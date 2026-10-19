@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createRateLimiter } from "@/lib/auth/rate-limit";
+import { authCallbackKey, createRateLimiter } from "@/lib/auth/rate-limit";
 
 describe("createRateLimiter", () => {
   it("allows up to the limit and then refuses", () => {
@@ -20,6 +20,15 @@ describe("createRateLimiter", () => {
     expect(limiter.check("a").allowed).toBe(false);
     time = 1000;
     expect(limiter.check("a").allowed).toBe(true);
+  });
+
+  it("limits credential callbacks and ignores other routes", () => {
+    expect(authCallbackKey("/api/auth/callback/visitor", "1.2.3.4")).toBe(
+      "auth-callback:1.2.3.4",
+    );
+    expect(authCallbackKey("/api/auth/callback/admin", "::1")).toBe("auth-callback:::1");
+    expect(authCallbackKey("/api/auth/session", "1.2.3.4")).toBeNull();
+    expect(authCallbackKey("/account/login", "1.2.3.4")).toBeNull();
   });
 
   it("tracks keys separately", () => {
