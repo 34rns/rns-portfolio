@@ -32,8 +32,20 @@ Set these in Vercel → Settings → Environment Variables (and locally in `.env
 | `LEMONSQUEEZY_API_KEY` | lemonsqueezy | Settings → API |
 | `LEMONSQUEEZY_STORE_ID` | lemonsqueezy | Numeric store id |
 | `LEMONSQUEEZY_WEBHOOK_SECRET` | lemonsqueezy | Signing secret for the webhook |
+| `BLOB_READ_WRITE_TOKEN` | for uploads | Vercel → Storage → Blob; without it uploads write to local disk, which production cannot do |
 
 Never commit `.env.local` or `.admin-credentials.txt`.
+
+### Blob storage
+
+1. Create a Blob store in the Vercel project (Storage → Blob) and connect it;
+   `BLOB_READ_WRITE_TOKEN` is added to the project automatically.
+2. Redeploy after adding it — `getStorage()` picks the driver from the token at
+   request time.
+3. Admin uploads then go browser → Blob directly (the token route at
+   `/api/admin/upload/blob` only signs after checking the admin session, the
+   extension, the size and the first bytes). Uploaded URLs are absolute Blob
+   URLs and need no rewrite.
 
 ## 3. Database
 
@@ -41,15 +53,17 @@ The Neon database already exists. On a new database:
 
 ```bash
 vercel env pull .env.local
-npm run db:migrate     # 0000 projects/users, 0001 purchases + webhook ledger, 0002 audit log
+npm run db:migrate     # 0000 projects/users, 0001 purchases + webhook ledger, 0002 audit log, 0003 model stage
 npm run db:seed        # optional demo projects
 ```
 
 New tables in Phase 2: `purchases`, `processed_webhook_events`, the
 `purchase_status` enum, and `projects.delivery_note` (migration `0001`).
 Migration `0002` adds `purchase_audit_log` and the `purchase_audit_action` enum
-for manual grants and revokes. Both migrations are additive; nothing was
-dropped or renamed, so existing production rows are untouched.
+for manual grants and revokes. Migration `0003` adds the 3D stage columns:
+`model_url`, `lighting`, `model_scale` and the three `model_offset_*` columns,
+all nullable or defaulted. Every migration is additive; nothing was dropped or
+renamed, so existing production rows are untouched.
 
 ## 4. Webhook endpoints
 
@@ -107,12 +121,18 @@ column, so history stays readable after a switch.
    amount. Grant a second test account access, confirm it unlocks on the project
    page, then revoke it and confirm the page locks again — both actions should
    appear in the audit trail with your admin email.
+9. Upload an image and a `.glb` from the admin, set the project theme to Anime
+   3D, save, and open the live project: the model loads, orbit and scroll work,
+   and the cover shows instead of WebGL under reduced motion. The uploaded URL
+   should be a `blob.vercel-storage.com` address, and the browser network tab
+   should show the upload going straight to Blob, not through a function.
 
 ## 7. Not included
 
 - No transactional email: no verification, receipts or password reset. Accounts
   work immediately after signup.
-- No Blob storage; cover and gallery still take URLs.
+- Local uploads are not shared between instances; production needs Blob.
+- The 3D model is public like the rest of the page, including for paid projects.
 - Rate limiting is in-memory per server instance, not a global limiter.
 - Comped (`manual`) orders are excluded from revenue and paid-order counts by
   design; they are still listed and audited.

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getProjectById } from "@/lib/db/queries";
+import { getStorage } from "@/lib/uploads/storage";
 import { themeList } from "@/themes/registry";
 import {
   ProjectForm,
@@ -48,6 +49,12 @@ export default async function EditProjectPage({
     price: project.priceCents != null ? (project.priceCents / 100).toString() : "",
     currency: project.currency,
     providerProductId: project.providerProductId ?? "",
+    modelUrl: project.modelUrl ?? "",
+    lighting: project.lighting,
+    modelScale: project.modelScale,
+    modelOffsetX: project.modelOffsetX,
+    modelOffsetY: project.modelOffsetY,
+    modelOffsetZ: project.modelOffsetZ,
     deliveryNote: project.deliveryNote ?? "",
     sortOrder: project.sortOrder,
   };
@@ -68,7 +75,11 @@ export default async function EditProjectPage({
       <p className="mt-1 text-sm text-[#6B6B64]">
         /{project.slug} · {project.status}
       </p>
-      <ProjectForm project={values} themes={themes} />
+      <ProjectForm
+        project={values}
+        themes={themes}
+        directUploads={getStorage().direct}
+      />
     </div>
   );
 }

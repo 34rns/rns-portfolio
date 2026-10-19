@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  LIGHTING_PRESETS,
+  MODEL_LIMITS,
+  type LightingPreset,
+} from "./model";
 
 const httpUrl = z
   .string()
@@ -10,6 +15,23 @@ const httpUrl = z
   );
 
 const optionalText = z.string().trim().max(2000);
+
+const lightingSchema = z.enum(
+  LIGHTING_PRESETS.map((preset) => preset.id) as [
+    LightingPreset,
+    ...LightingPreset[],
+  ],
+);
+
+const modelScale = z.coerce
+  .number()
+  .min(MODEL_LIMITS.scale.min, `Keep the scale above ${MODEL_LIMITS.scale.min}`)
+  .max(MODEL_LIMITS.scale.max, `Keep the scale under ${MODEL_LIMITS.scale.max}`);
+
+const modelOffset = z.coerce
+  .number()
+  .min(MODEL_LIMITS.offset.min)
+  .max(MODEL_LIMITS.offset.max);
 
 export const projectInputSchema = z
   .object({
@@ -43,6 +65,12 @@ export const projectInputSchema = z
       .toUpperCase()
       .regex(/^[A-Z]{3}$/, "Use a 3-letter currency code"),
     providerProductId: optionalText,
+    modelUrl: httpUrl,
+    lighting: lightingSchema,
+    modelScale,
+    modelOffsetX: modelOffset,
+    modelOffsetY: modelOffset,
+    modelOffsetZ: modelOffset,
     deliveryNote: z.string().trim().max(4000),
     sortOrder: z.coerce.number().int().min(0).max(9999),
   })
@@ -85,6 +113,12 @@ export function parseProjectForm(
     priceCents: price ? Math.round(Number(price) * 100) : null,
     currency: String(formData.get("currency") ?? "USD"),
     providerProductId: String(formData.get("providerProductId") ?? ""),
+    modelUrl: String(formData.get("modelUrl") ?? ""),
+    lighting: String(formData.get("lighting") ?? "studio"),
+    modelScale: String(formData.get("modelScale") ?? "1") || "1",
+    modelOffsetX: String(formData.get("modelOffsetX") ?? "0") || "0",
+    modelOffsetY: String(formData.get("modelOffsetY") ?? "0") || "0",
+    modelOffsetZ: String(formData.get("modelOffsetZ") ?? "0") || "0",
     deliveryNote: String(formData.get("deliveryNote") ?? ""),
     sortOrder: String(formData.get("sortOrder") ?? "0"),
   };

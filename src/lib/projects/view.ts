@@ -1,4 +1,5 @@
 import type { ProjectRecord } from "@/lib/db/schema";
+import { getLightingPreset, type ProjectModel } from "./model";
 
 export type ProjectLink = {
   slug: string;
@@ -21,6 +22,7 @@ export type ProjectView = {
   isPaid: boolean;
   priceCents: number | null;
   currency: string;
+  model: ProjectModel;
 };
 
 export function toProjectView(project: ProjectRecord): ProjectView {
@@ -39,6 +41,12 @@ export function toProjectView(project: ProjectRecord): ProjectView {
     isPaid: project.isPaid,
     priceCents: project.priceCents,
     currency: project.currency,
+    model: {
+      url: project.modelUrl,
+      lighting: getLightingPreset(project.lighting).id,
+      scale: project.modelScale,
+      offset: [project.modelOffsetX, project.modelOffsetY, project.modelOffsetZ],
+    },
   };
 }
 

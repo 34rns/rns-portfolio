@@ -174,10 +174,6 @@ body {
   animation: intro-out 0.22s cubic-bezier(0.7, 0, 0.2, 1) 0.12s forwards;
 }
 
-html.intro-skip .intro {
-  display: none;
-}
-
 .intro-mark {
   font-size: clamp(3rem, 10vw, 7rem);
   color: var(--theme-text);

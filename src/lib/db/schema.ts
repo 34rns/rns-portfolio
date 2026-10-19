@@ -6,6 +6,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  real,
   text,
   timestamp,
   uniqueIndex,
@@ -60,6 +61,14 @@ export const projects = pgTable("projects", {
   priceCents: integer("price_cents"),
   currency: text("currency").notNull().default("USD"),
   providerProductId: text("provider_product_id"),
+  /** .glb/.gltf shown by themes that ship a 3D stage. */
+  modelUrl: text("model_url"),
+  /** Preset id from `LIGHTING_PRESETS`; the viewer maps it to a light rig. */
+  lighting: text("lighting").notNull().default("studio"),
+  modelScale: real("model_scale").notNull().default(1),
+  modelOffsetX: real("model_offset_x").notNull().default(0),
+  modelOffsetY: real("model_offset_y").notNull().default(0),
+  modelOffsetZ: real("model_offset_z").notNull().default(0),
   /** Revealed to buyers only; never rendered on the static page. */
   deliveryNote: text("delivery_note"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
