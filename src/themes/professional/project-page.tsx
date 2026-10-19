@@ -19,7 +19,7 @@ function ExternalLink({ href, children }: { href: string; children: React.ReactN
   );
 }
 
-export function ProfessionalProjectPage({ project, next }: ProjectPageProps) {
+export function ProfessionalProjectPage({ project, next, access }: ProjectPageProps) {
   return (
     <div className="min-h-screen pb-20">
       <header className="mx-auto flex max-w-[1440px] items-center justify-between px-5 pt-7 md:px-10">
@@ -59,6 +59,8 @@ export function ProfessionalProjectPage({ project, next }: ProjectPageProps) {
             </span>
           ) : null}
         </div>
+
+        {access ? <div className="mt-10">{access}</div> : null}
 
         <div className="mt-10 md:mt-14">
           <ParallaxCover project={project} />

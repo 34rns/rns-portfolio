@@ -5,7 +5,8 @@ import {
   getPublishedProjectLinks,
   getPublishedProjectSlugs,
 } from "@/lib/db/queries";
-import { toProjectView } from "@/lib/projects/view";
+import { ProjectAccess } from "@/components/project-access";
+import { formatPrice, toProjectView } from "@/lib/projects/view";
 import { getTheme } from "@/themes/registry";
 import { themeVars } from "@/themes/style";
 
@@ -55,6 +56,20 @@ export default async function ProjectPage({ params }: RouteParams) {
 
   const theme = getTheme(project.theme);
   const ProjectPage = theme.ProjectPage;
+  const view = toProjectView(project);
+  // Buyer-only content never enters the static HTML: the URL is stripped here
+  // and the delivery note is never part of the view model.
+  const safeView = view.isPaid ? { ...view, liveUrl: null } : view;
+  const access =
+    view.isPaid && view.priceCents
+      ? (
+          <ProjectAccess
+            slug={view.slug}
+            priceLabel={formatPrice(view.priceCents, view.currency)}
+            isPaid
+          />
+        )
+      : null;
 
   return (
     <div
@@ -62,9 +77,10 @@ export default async function ProjectPage({ params }: RouteParams) {
       data-theme={theme.slug}
     >
       <ProjectPage
-        project={toProjectView(project)}
+        project={safeView}
         previous={null}
         next={next}
+        access={access}
       />
     </div>
   );

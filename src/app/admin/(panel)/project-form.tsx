@@ -36,6 +36,7 @@ export type ProjectFormValues = {
   price: string;
   currency: string;
   providerProductId: string;
+  deliveryNote: string;
   sortOrder: number;
 };
 
@@ -58,6 +59,7 @@ export const emptyProject: ProjectFormValues = {
   price: "",
   currency: "USD",
   providerProductId: "",
+  deliveryNote: "",
   sortOrder: 0,
 };
 
@@ -424,7 +426,7 @@ export function ProjectForm({
           <section className="border border-[#E1E1DA] bg-white p-5">
             <h2 className="text-sm font-medium">Monetization</h2>
             <p className="mt-1 text-xs leading-relaxed text-[#6B6B64]">
-              Fields only. Checkout and signups land in Phase 2.
+              Paid projects show a buy panel. Buyers unlock the live URL and the delivery note.
             </p>
 
             <label className="mt-4 flex items-center gap-2 text-sm">
@@ -478,6 +480,23 @@ export function ProjectForm({
                     name="providerProductId"
                     defaultValue={project.providerProductId}
                   />
+                  <FieldError message={errors.providerProductId} />
+                </div>
+                <div>
+                  <label className="admin-label" htmlFor="deliveryNote">
+                    Delivery note (buyers only)
+                  </label>
+                  <textarea
+                    className="admin-field min-h-24 font-mono text-xs"
+                    id="deliveryNote"
+                    name="deliveryNote"
+                    defaultValue={project.deliveryNote}
+                  />
+                  <p className="mt-1 text-xs text-[#6B6B64]">
+                    License key, setup steps or credentials. Never rendered for
+                    visitors who have not bought the project.
+                  </p>
+                  <FieldError message={errors.deliveryNote} />
                 </div>
               </div>
             ) : (

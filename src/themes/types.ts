@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import type { ProjectLink, ProjectView } from "@/lib/projects/view";
 
 export type ThemeTokens = {
@@ -19,6 +19,8 @@ export type ProjectPageProps = {
   project: ProjectView;
   previous: ProjectLink | null;
   next: ProjectLink | null;
+  /** Buyer-only access panel, rendered by the route so the theme only places it. */
+  access?: ReactNode;
 };
 
 export type ThemeDefinition = {
