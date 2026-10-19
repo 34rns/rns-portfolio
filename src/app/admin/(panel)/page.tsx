@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { getAllProjects, getAdminStats } from "@/lib/db/queries";
+import { dbStore } from "@/lib/payments/db-store";
+import { formatPrice } from "@/lib/projects/view";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const [stats, recent] = await Promise.all([getAdminStats(), getAllProjects()]);
+  const [stats, recent, commerce] = await Promise.all([
+    getAdminStats(),
+    getAllProjects(),
+    dbStore.commerceStats(),
+  ]);
 
   return (
     <div>
@@ -57,16 +63,20 @@ export default async function AdminDashboard() {
       <section className="mt-10 grid gap-3 sm:grid-cols-2">
         <div className="border border-[#E1E1DA] bg-white p-5">
           <h2 className="text-sm font-medium">Signups</h2>
-          <p className="mt-2 text-sm leading-relaxed text-[#6B6B64]">
-            Visitor accounts arrive with payments in Phase 2. Nothing to show
-            until then.
-          </p>
+          <p className="mt-2 text-3xl font-medium tabular-nums">{commerce.signups}</p>
+          <p className="mt-1 text-sm text-[#6B6B64]">Visitor accounts</p>
         </div>
         <div className="border border-[#E1E1DA] bg-white p-5">
           <h2 className="text-sm font-medium">Revenue</h2>
-          <p className="mt-2 text-sm leading-relaxed text-[#6B6B64]">
-            No payment provider is connected yet. Checkout, orders and webhook
-            receipts land in Phase 2.
+          <p className="mt-2 text-3xl font-medium tabular-nums">
+            {commerce.revenue.length === 0
+              ? formatPrice(0, "USD")
+              : commerce.revenue
+                  .map((entry) => formatPrice(entry.cents, entry.currency))
+                  .join(" + ")}
+          </p>
+          <p className="mt-1 text-sm text-[#6B6B64]">
+            {commerce.paidOrders} paid {commerce.paidOrders === 1 ? "order" : "orders"}
           </p>
         </div>
       </section>

@@ -48,6 +48,7 @@ export default async function EditProjectPage({
     price: project.priceCents != null ? (project.priceCents / 100).toString() : "",
     currency: project.currency,
     providerProductId: project.providerProductId ?? "",
+    deliveryNote: project.deliveryNote ?? "",
     sortOrder: project.sortOrder,
   };
 

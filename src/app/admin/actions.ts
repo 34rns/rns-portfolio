@@ -1,6 +1,7 @@
 "use server";
 
 import { AuthError } from "next-auth";
+import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -8,6 +9,7 @@ import { db } from "@/lib/db/client";
 import { projects } from "@/lib/db/schema";
 import { getAllProjects, getProjectById } from "@/lib/db/queries";
 import { signIn, signOut } from "@/lib/auth";
+import { authRateLimit } from "@/lib/auth/rate-limit";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { computeReorder } from "@/lib/projects/order";
 import { revalidateProject } from "@/lib/projects/revalidate";
@@ -23,8 +25,14 @@ export async function loginAction(
   _state: FormState,
   formData: FormData,
 ): Promise<FormState> {
+  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+  const limit = authRateLimit.check(`admin-login:${ip}`);
+  if (!limit.allowed) {
+    return { error: "Too many attempts. Wait a few minutes and try again." };
+  }
+
   try {
-    await signIn("credentials", {
+    await signIn("admin", {
       email: String(formData.get("email") ?? ""),
       password: String(formData.get("password") ?? ""),
       redirectTo: "/admin",
@@ -99,6 +107,7 @@ export async function saveProject(
     priceCents: data.isPaid ? data.priceCents : null,
     currency: data.currency,
     providerProductId: data.providerProductId || null,
+    deliveryNote: data.isPaid ? data.deliveryNote || null : null,
     updatedAt: new Date(),
     publishedAt,
   };

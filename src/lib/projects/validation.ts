@@ -43,6 +43,7 @@ export const projectInputSchema = z
       .toUpperCase()
       .regex(/^[A-Z]{3}$/, "Use a 3-letter currency code"),
     providerProductId: optionalText,
+    deliveryNote: z.string().trim().max(4000),
     sortOrder: z.coerce.number().int().min(0).max(9999),
   })
   .refine((value) => !value.isPaid || (value.priceCents ?? 0) > 0, {
@@ -84,6 +85,7 @@ export function parseProjectForm(
     priceCents: price ? Math.round(Number(price) * 100) : null,
     currency: String(formData.get("currency") ?? "USD"),
     providerProductId: String(formData.get("providerProductId") ?? ""),
+    deliveryNote: String(formData.get("deliveryNote") ?? ""),
     sortOrder: String(formData.get("sortOrder") ?? "0"),
   };
 
