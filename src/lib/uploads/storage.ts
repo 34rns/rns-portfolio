@@ -5,6 +5,24 @@ import { contentTypeForExtension } from "./policy";
 
 export type StorageDriver = "local" | "vercel-blob";
 
+/**
+ * Raised when the configuration says Blob but the token is not there. The
+ * admin routes turn this into a 503 instead of silently falling back to the
+ * local driver, because production cannot write to disk and a half-working
+ * upload is worse than a refused one.
+ */
+export class StorageNotConfiguredError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "StorageNotConfiguredError";
+  }
+}
+
+const MISSING_BLOB_TOKEN =
+  "Image storage is not configured: STORAGE_PROVIDER is \"blob\" but " +
+  "BLOB_READ_WRITE_TOKEN is missing. Connect a Blob store in Vercel " +
+  "(Storage -> Blob -> Connect to Project), then redeploy.";
+
 export type StoredFile = {
   driver: StorageDriver;
   url: string;
@@ -85,8 +103,55 @@ export const blobStorageAdapter: StorageAdapter = {
   },
 };
 
+/**
+ * Which driver the current environment is meant to use.
+ *
+ * `STORAGE_PROVIDER` is authoritative when set: production and preview pin it
+ * to `blob` so a missing token is a loud failure rather than a silent write to
+ * a filesystem that does not survive a deploy. Without it we fall back to
+ * token presence, which is what a plain local checkout sees.
+ */
+export function resolveStorageDriver(): StorageDriver {
+  const configured = process.env.STORAGE_PROVIDER?.trim().toLowerCase();
+  if (configured === "blob" || configured === "vercel-blob") return "vercel-blob";
+  if (configured === "local" || configured === "disk") return "local";
+  if (configured) {
+    throw new StorageNotConfiguredError(
+      `Unknown STORAGE_PROVIDER "${configured}". Use "blob" or "local".`,
+    );
+  }
+  return process.env.BLOB_READ_WRITE_TOKEN ? "vercel-blob" : "local";
+}
+
+/** True when the configured driver is usable right now. */
+export function storageReady(): boolean {
+  try {
+    if (resolveStorageDriver() === "local") return true;
+    return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  } catch {
+    return false;
+  }
+}
+
 export function getStorage(): StorageAdapter {
-  return process.env.BLOB_READ_WRITE_TOKEN ? blobStorageAdapter : localStorageAdapter;
+  const driver = resolveStorageDriver();
+  if (driver === "vercel-blob" && !process.env.BLOB_READ_WRITE_TOKEN) {
+    throw new StorageNotConfiguredError(MISSING_BLOB_TOKEN);
+  }
+  return driver === "vercel-blob" ? blobStorageAdapter : localStorageAdapter;
+}
+
+/**
+ * Whether the admin form may upload straight to Blob. Never throws: the form
+ * falls back to the proxy route, which reports the misconfiguration with a
+ * clear status instead of crashing the admin page that renders it.
+ */
+export function directUploadsEnabled(): boolean {
+  try {
+    return getStorage().direct;
+  } catch {
+    return false;
+  }
 }
 
 const SAFE_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;

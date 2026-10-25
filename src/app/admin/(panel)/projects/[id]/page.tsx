@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getProjectById } from "@/lib/db/queries";
-import { getStorage } from "@/lib/uploads/storage";
+import { directUploadsEnabled } from "@/lib/uploads/storage";
 import { themeList } from "@/themes/registry";
 import {
   ProjectForm,
@@ -78,7 +78,7 @@ export default async function EditProjectPage({
       <ProjectForm
         project={values}
         themes={themes}
-        directUploads={getStorage().direct}
+        directUploads={directUploadsEnabled()}
       />
     </div>
   );
