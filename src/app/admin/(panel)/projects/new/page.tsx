@@ -1,4 +1,4 @@
-import { getStorage } from "@/lib/uploads/storage";
+import { directUploadsEnabled } from "@/lib/uploads/storage";
 import { themeList } from "@/themes/registry";
 import { ProjectForm, type ThemeChoice } from "../../project-form";
 
@@ -20,7 +20,7 @@ export default function NewProjectPage() {
       <p className="mt-1 text-sm text-[#6B6B64]">
         Drafts stay private until you publish. Preview works before publishing.
       </p>
-      <ProjectForm themes={themes} directUploads={getStorage().direct} />
+      <ProjectForm themes={themes} directUploads={directUploadsEnabled()} />
     </div>
   );
 }

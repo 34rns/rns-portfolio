@@ -1,16 +1,45 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import {
   headerValue,
+  isProductionRuntime,
   type CheckoutRequest,
   type PaymentEvent,
   type PaymentProvider,
   type WebhookHeaders,
 } from "./types";
 
-const DEFAULT_SECRET = "mock-payment-secret";
+/**
+ * Raised whenever anything tries to reach the mock adapter from a production
+ * runtime. Selection is already refused upstream; these guards exist so no
+ * later call site can reintroduce the bypass.
+ */
+export class MockProviderBlockedInProductionError extends Error {
+  constructor() {
+    super(
+      "The mock payment provider cannot be used in production. " +
+        "Set PAYMENT_PROVIDER to \"polar\" or \"lemonsqueezy\" with its keys.",
+    );
+    this.name = "MockProviderBlockedInProductionError";
+  }
+}
 
+function assertMockAllowed(): void {
+  if (isProductionRuntime()) throw new MockProviderBlockedInProductionError();
+}
+
+/**
+ * No fallback value: a signature anyone can guess is worse than no signature.
+ * The mock checkout and the webhook both refuse to run until this is set.
+ */
 export function mockSecret(): string {
-  return process.env.MOCK_PAYMENT_SECRET || DEFAULT_SECRET;
+  const secret = process.env.MOCK_PAYMENT_SECRET?.trim();
+  if (!secret) {
+    throw new Error(
+      "MOCK_PAYMENT_SECRET is required when PAYMENT_PROVIDER is \"mock\". " +
+        "Set it to any random string in .env.local (never commit it).",
+    );
+  }
+  return secret;
 }
 
 export function signMockPayload(rawBody: string, secret = mockSecret()): string {
@@ -76,6 +105,7 @@ export const mockProvider: PaymentProvider = {
   id: "mock",
 
   async createCheckout(request: CheckoutRequest) {
+    assertMockAllowed();
     const origin = (() => {
       try {
         return new URL(request.successUrl).origin;
@@ -93,6 +123,7 @@ export const mockProvider: PaymentProvider = {
   },
 
   async verifyWebhook(rawBody: string, headers: WebhookHeaders) {
+    assertMockAllowed();
     const provided = headerValue(headers, "x-mock-signature");
     if (!provided) return false;
     return safeEqual(provided.trim(), signMockPayload(rawBody));

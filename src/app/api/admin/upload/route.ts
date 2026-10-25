@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { UPLOAD_POLICY, validateUpload } from "@/lib/uploads/policy";
-import { getStorage } from "@/lib/uploads/storage";
+import { getStorage, StorageNotConfiguredError } from "@/lib/uploads/storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,7 +41,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const stored = await getStorage().put({
+    const storage = getStorage();
+    const stored = await storage.put({
       key: result.upload.key,
       data: bytes,
       contentType: result.upload.contentType,
@@ -59,6 +60,11 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
+    // Storage says Blob but the token is gone: refuse loudly rather than
+    // writing to a disk the deployment cannot keep.
+    if (error instanceof StorageNotConfiguredError) {
+      return NextResponse.json({ error: error.message }, { status: 503 });
+    }
     console.error("upload failed", error);
     return NextResponse.json(
       { error: "The file could not be stored. Try again." },

@@ -2,6 +2,7 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { UPLOAD_POLICY, validateUploadToken } from "@/lib/uploads/policy";
+import { resolveStorageDriver, StorageNotConfiguredError } from "@/lib/uploads/storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,6 +35,26 @@ export async function POST(request: Request) {
     body = (await request.json()) as HandleUploadBody;
   } catch {
     return NextResponse.json({ error: "Upload could not be read." }, { status: 400 });
+  }
+
+  // Refuse before signing anything: without the token this route cannot hand
+  // the browser a credential, and the browser must not fall back to disk.
+  try {
+    if (resolveStorageDriver() === "vercel-blob" && !process.env.BLOB_READ_WRITE_TOKEN) {
+      throw new StorageNotConfiguredError(
+        "Image storage is not configured: STORAGE_PROVIDER is \"blob\" but " +
+          "BLOB_READ_WRITE_TOKEN is missing. Connect a Blob store in Vercel " +
+          "(Storage -> Blob -> Connect to Project), then redeploy.",
+      );
+    }
+  } catch (error) {
+    if (error instanceof StorageNotConfiguredError) {
+      return NextResponse.json({ error: error.message }, { status: 503 });
+    }
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Upload was refused." },
+      { status: 500 },
+    );
   }
 
   try {

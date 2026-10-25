@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPaymentProvider } from "@/lib/payments";
+import { getPaymentProvider, MockProviderBlockedInProductionError } from "@/lib/payments";
 import { dbStore } from "@/lib/payments/db-store";
 import { handlePaymentWebhook } from "@/lib/payments/webhook";
 
@@ -15,7 +15,10 @@ export async function POST(
   let provider;
   try {
     provider = getPaymentProvider(slug);
-  } catch {
+  } catch (error) {
+    if (error instanceof MockProviderBlockedInProductionError) {
+      return NextResponse.json({ error: error.message }, { status: 503 });
+    }
     return NextResponse.json({ error: "Unknown provider." }, { status: 404 });
   }
 

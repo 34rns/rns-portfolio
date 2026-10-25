@@ -34,8 +34,10 @@ export async function POST(request: Request) {
   try {
     provider = getPaymentProvider();
   } catch (error) {
+    // Configuration problems (mock blocked in production, missing secret) are
+    // reported as such instead of a bare 500.
     const message = error instanceof Error ? error.message : "Payments are misconfigured.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 503 });
   }
 
   const result = await startCheckout({

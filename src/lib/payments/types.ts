@@ -1,5 +1,13 @@
 export type PaymentProviderId = "mock" | "polar" | "lemonsqueezy";
 
+/**
+ * `next build`/`next start` and every Vercel deployment (preview included) run
+ * with NODE_ENV=production; `next dev` and the test runner do not.
+ */
+export function isProductionRuntime(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
 export type WebhookHeaders = Headers | Record<string, string | null | undefined>;
 
 export type CheckoutRequest = {
