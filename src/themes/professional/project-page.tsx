@@ -1,7 +1,9 @@
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { ReleaseVersion } from "@/components/release-version";
 import { SmartImage } from "@/components/smart-image";
+import { isReleaseDownloadLink } from "@/lib/projects/links";
 import type { ProjectPageProps } from "../types";
 import { ParallaxCover } from "./components/parallax-cover";
 
@@ -48,7 +50,15 @@ export function ProfessionalProjectPage({ project, next, access }: ProjectPagePr
 
         <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-y border-[var(--theme-line)] py-4">
           {project.liveUrl ? (
-            <ExternalLink href={project.liveUrl}>Live site</ExternalLink>
+            <ExternalLink href={project.liveUrl}>
+              {isReleaseDownloadLink(project.liveUrl) ? "Download" : "Live site"}
+              {isReleaseDownloadLink(project.liveUrl) && project.repoUrl ? (
+                <ReleaseVersion
+                  repoUrl={project.repoUrl}
+                  className="ml-2 text-[var(--theme-muted)]"
+                />
+              ) : null}
+            </ExternalLink>
           ) : null}
           {project.repoUrl ? (
             <ExternalLink href={project.repoUrl}>Repository</ExternalLink>
