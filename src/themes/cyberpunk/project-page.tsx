@@ -1,9 +1,11 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ModelStage } from "@/components/model-stage/model-stage";
+import { ReleaseVersion } from "@/components/release-version";
 import { SmartImage } from "@/components/smart-image";
+import { isReleaseDownloadLink } from "@/lib/projects/links";
 import { getLightingPreset } from "@/lib/projects/model";
 import type { ProjectPageProps } from "../types";
 import { CyberBoot } from "./boot";
@@ -16,10 +18,12 @@ function Uplink({
   href,
   label,
   hint,
+  badge,
 }: {
   href: string;
   label: string;
   hint: string;
+  badge?: ReactNode;
 }) {
   return (
     <a
@@ -29,7 +33,12 @@ function Uplink({
       className="cyber-uplink"
       data-cursor="view"
     >
-      <span className="cyber-uplink-label">{label}</span>
+      <span className="cyber-uplink-label">
+        {label}
+        {badge ? (
+          <span className="ml-2 text-[0.8em] opacity-70">{badge}</span>
+        ) : null}
+      </span>
       <span className="cyber-uplink-hint">{hint}</span>
       <span className="cyber-uplink-arrow" aria-hidden="true">
         &#8599;
@@ -132,8 +141,21 @@ export function CyberpunkProjectPage({
                   {project.liveUrl ? (
                     <Uplink
                       href={project.liveUrl}
-                      label="Live site"
-                      hint="External uplink"
+                      label={
+                        isReleaseDownloadLink(project.liveUrl)
+                          ? "Download"
+                          : "Live site"
+                      }
+                      hint={
+                        isReleaseDownloadLink(project.liveUrl)
+                          ? "Stable latest build"
+                          : "External uplink"
+                      }
+                      badge={
+                        isReleaseDownloadLink(project.liveUrl) ? (
+                          <ReleaseVersion repoUrl={project.repoUrl} />
+                        ) : null
+                      }
                     />
                   ) : null}
                   {project.repoUrl ? (
@@ -266,8 +288,21 @@ export function CyberpunkProjectPage({
                     {project.liveUrl ? (
                       <Uplink
                         href={project.liveUrl}
-                        label="Live site"
-                        hint="Open in new tab"
+                        label={
+                          isReleaseDownloadLink(project.liveUrl)
+                            ? "Download"
+                            : "Live site"
+                        }
+                        hint={
+                          isReleaseDownloadLink(project.liveUrl)
+                            ? "Stable latest build"
+                            : "Open in new tab"
+                        }
+                        badge={
+                          isReleaseDownloadLink(project.liveUrl) ? (
+                            <ReleaseVersion repoUrl={project.repoUrl} />
+                          ) : null
+                        }
                       />
                     ) : null}
                     {project.repoUrl ? (
