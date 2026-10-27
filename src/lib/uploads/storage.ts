@@ -1,6 +1,6 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { put } from "@vercel/blob";
+import { del, put } from "@vercel/blob";
 import { contentTypeForExtension } from "./policy";
 
 export type StorageDriver = "local" | "vercel-blob";
@@ -40,6 +40,8 @@ export type StorageAdapter = {
     data: Uint8Array;
     contentType: string;
   }): Promise<StoredFile>;
+  /** Removes one stored key. A missing key is not an error. */
+  remove(key: string): Promise<void>;
 };
 
 function uploadRoot(): string {
@@ -76,6 +78,12 @@ export const localStorageAdapter: StorageAdapter = {
       contentType,
     };
   },
+  async remove(key) {
+    const root = uploadRoot();
+    const target = path.resolve(root, key);
+    if (target !== root && !target.startsWith(`${root}${path.sep}`)) return;
+    await rm(/* turbopackIgnore: true */ target, { force: true });
+  },
 };
 
 /**
@@ -101,7 +109,34 @@ export const blobStorageAdapter: StorageAdapter = {
       contentType,
     };
   },
+  async remove(key) {
+    await del(key, { token: process.env.BLOB_READ_WRITE_TOKEN });
+  },
 };
+
+const LOCAL_URL_PREFIX = "/api/uploads/";
+
+/**
+ * Deletes whatever `url` points at, whichever driver stored it. Local URLs are
+ * `/api/uploads/<key>`, Blob URLs are absolute and keyed by their pathname.
+ */
+export async function deleteStoredFile(url: string): Promise<void> {
+  const driver = resolveStorageDriver();
+
+  if (url.startsWith(LOCAL_URL_PREFIX)) {
+    const key = url
+      .slice(LOCAL_URL_PREFIX.length)
+      .split("/")
+      .map(decodeURIComponent)
+      .join("/");
+    if (driver === "local") return localStorageAdapter.remove(key);
+    return blobStorageAdapter.remove(key);
+  }
+
+  if (/^https?:\/\//i.test(url) && driver === "vercel-blob") {
+    return blobStorageAdapter.remove(url);
+  }
+}
 
 /**
  * Which driver the current environment is meant to use.
