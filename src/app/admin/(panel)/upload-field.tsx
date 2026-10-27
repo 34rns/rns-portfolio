@@ -72,6 +72,30 @@ function uploadProxy(file: File, onProgress: (percent: number) => void): Promise
   });
 }
 
+/**
+ * Uploads one file and reports where it landed. Shared with the model library,
+ * which needs the same direct-to-Blob path for large .glb files.
+ */
+export async function uploadFile({
+  file,
+  direct,
+  onProgress,
+}: {
+  file: File;
+  direct: boolean;
+  onProgress: (percent: number) => void;
+}): Promise<{ url: string; size: number }> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const validated = validateUpload({ name: file.name, type: file.type, bytes });
+  if (!validated.ok) throw new Error(validated.error);
+
+  const url = direct
+    ? await uploadDirect(file, bytes, validated.upload, onProgress)
+    : await uploadProxy(file, onProgress);
+
+  return { url, size: bytes.byteLength };
+}
+
 export function UploadField({
   kind,
   direct,
@@ -100,13 +124,7 @@ export function UploadField({
     setFileName(file.name);
 
     try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const validated = validateUpload({ name: file.name, type: file.type, bytes });
-      if (!validated.ok) throw new Error(validated.error);
-
-      const url = direct
-        ? await uploadDirect(file, bytes, validated.upload, setProgress)
-        : await uploadProxy(file, setProgress);
+      const { url } = await uploadFile({ file, direct, onProgress: setProgress });
 
       setProgress(100);
       setStatus("done");
