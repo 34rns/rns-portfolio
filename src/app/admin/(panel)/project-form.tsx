@@ -29,6 +29,7 @@ export type ProjectFormValues = {
   tags: string;
   liveUrl: string;
   repoUrl: string;
+  downloadUrl: string;
   year: number;
   status: "draft" | "published";
   placement: "featured" | "unlisted";
@@ -58,6 +59,7 @@ export const emptyProject: ProjectFormValues = {
   tags: "",
   liveUrl: "",
   repoUrl: "",
+  downloadUrl: "",
   year: new Date().getFullYear(),
   status: "draft",
   placement: "featured",
@@ -90,10 +92,13 @@ export function ProjectForm({
   project = emptyProject,
   themes,
   directUploads = false,
+  models = [],
 }: {
   project?: ProjectFormValues;
   themes: ThemeChoice[];
   directUploads?: boolean;
+  /** The 3D model library, so a project can point at an existing file. */
+  models?: { name: string; url: string }[];
 }) {
   const [state, action, pending] = useActionState(saveProject, {} as FormState);
   const [title, setTitle] = useState(project.title);
@@ -269,6 +274,23 @@ export function ProjectForm({
                   />
                   <FieldError message={errors.repoUrl} />
                 </div>
+                <div className="sm:col-span-2">
+                  <label className="admin-label" htmlFor="downloadUrl">
+                    Free download URL
+                  </label>
+                  <input
+                    className="admin-field"
+                    id="downloadUrl"
+                    name="downloadUrl"
+                    defaultValue={project.downloadUrl}
+                    placeholder="https://…/app.zip"
+                  />
+                  <p className="mt-1 text-xs text-[#6B6B64]">
+                    Shown on the project page even when the project is paid — the
+                    app is free, only Pro is sold.
+                  </p>
+                  <FieldError message={errors.downloadUrl} />
+                </div>
               </div>
 
               <div>
@@ -348,6 +370,45 @@ export function ProjectForm({
             </p>
 
             <div className="mt-4 grid gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                {models.length > 0 ? (
+                  <label className="block text-sm" htmlFor="modelLibrary">
+                    <span className="admin-label">From the library</span>
+                    <select
+                      className="admin-field"
+                      id="modelLibrary"
+                      value={models.some((entry) => entry.url === modelUrl) ? modelUrl : ""}
+                      onChange={(event) => setModelUrl(event.target.value)}
+                    >
+                      <option value="">Choose a stored model…</option>
+                      {models.map((entry) => (
+                        <option key={entry.url} value={entry.url}>
+                          {entry.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : (
+                  <p className="text-xs text-[#6B6B64]">
+                    The library is empty — upload a model below or from Admin → 3D
+                    models.
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setModelUrl("")}
+                  disabled={!modelUrl}
+                  className="border border-[#B3261E] px-3 py-1.5 text-sm text-[#B3261E] disabled:opacity-40"
+                >
+                  Remove 3D model
+                </button>
+              </div>
+              <p className="text-xs leading-relaxed text-[#6B6B64]">
+                Removing the model turns the 3D stage off and the project falls back
+                to its cover image. Scale, offset and lighting are kept for later.
+              </p>
+
               <MediaField
                 label="Main 3D model"
                 fieldName="modelUrl"

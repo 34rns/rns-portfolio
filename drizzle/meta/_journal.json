@@ -29,6 +29,13 @@
       "when": 1792391556212,
       "tag": "0003_quick_black_cat",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793111927277,
+      "tag": "0004_majestic_proudstar",
+      "breakpoints": true
     }
   ]
 }

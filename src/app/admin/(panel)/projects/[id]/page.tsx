@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getProjectById } from "@/lib/db/queries";
+import { dbModelStore } from "@/lib/models/db-store";
 import { directUploadsEnabled } from "@/lib/uploads/storage";
 import { themeList } from "@/themes/registry";
 import {
@@ -19,6 +20,11 @@ export default async function EditProjectPage({
   const project = await getProjectById(id);
 
   if (!project) notFound();
+
+  const models = (await dbModelStore.listModels()).map((model) => ({
+    name: model.name,
+    url: model.url,
+  }));
 
   const themes: ThemeChoice[] = themeList.map((theme) => ({
     slug: theme.slug,
@@ -40,6 +46,7 @@ export default async function EditProjectPage({
     tags: project.tags.join(", "),
     liveUrl: project.liveUrl ?? "",
     repoUrl: project.repoUrl ?? "",
+    downloadUrl: project.downloadUrl ?? "",
     year: project.year,
     status: project.status,
     placement: project.placement,
@@ -79,6 +86,7 @@ export default async function EditProjectPage({
         project={values}
         themes={themes}
         directUploads={directUploadsEnabled()}
+        models={models}
       />
     </div>
   );
