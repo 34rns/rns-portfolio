@@ -36,6 +36,17 @@ describe("entitlement gating", () => {
     expect(entitlement.deliveryNote).toBe("License key: TEST-1234");
   });
 
+  it("gives a signed-out visitor nothing but the price", () => {
+    const entitlement = buildEntitlement({ project, purchase: null, authenticated: false });
+
+    expect(entitlement).toMatchObject({
+      authenticated: false,
+      purchased: false,
+      liveUrl: null,
+      deliveryNote: null,
+    });
+  });
+
   it("never marks a free project as purchased", () => {
     const entitlement = buildEntitlement({
       project: { ...project, isPaid: false },

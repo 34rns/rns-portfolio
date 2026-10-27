@@ -66,12 +66,14 @@ export function recordLicenseFailure({
   const byIp = failures.check(`ip:${ip}`);
   const byKey = failures.check(`key:${keyHash}`);
 
+  // `remaining === 0` is the tenth failure: the counter allows the request that
+  // exhausts the budget, so the lockout starts on the one that fills it.
   let lockedOut = false;
-  if (!byIp.allowed) {
+  if (!byIp.allowed || byIp.remaining === 0) {
     locked.set(`ip:${ip}`, now + LOCKOUT_MS);
     lockedOut = true;
   }
-  if (!byKey.allowed) {
+  if (!byKey.allowed || byKey.remaining === 0) {
     locked.set(`key:${keyHash}`, now + LOCKOUT_MS);
     lockedOut = true;
   }

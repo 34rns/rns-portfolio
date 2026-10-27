@@ -4,7 +4,8 @@ A statically generated portfolio where every project page renders through its
 own theme. Phases 1–2 ship the platform, the admin panel, the Professional
 theme, visitor accounts and provider-agnostic payments; Phase 3 adds uploaded
 3D models and the Anime 3D theme; Phase 4 adds the Synthwave theme; Phase 5
-adds the Cyberpunk theme.
+adds the Cyberpunk theme; Phase 6 adds manual Pro licensing — license keys, a
+verification API for the apps, and a 3D model library.
 
 Live: https://rns-portfolio-teal.vercel.app
 
@@ -16,7 +17,8 @@ Live: https://rns-portfolio-teal.vercel.app
 - Uploads through one adapter: local disk in development, Vercel Blob in production
 - Neon Postgres via the Vercel Marketplace, Drizzle ORM + `neon-http`
 - Auth.js v5: an admin credential and separate visitor accounts
-- Payments behind one interface: mock (local), Polar, Lemon Squeezy
+- Payments behind one interface: manual (default in production), mock (local
+  only), Polar, Lemon Squeezy
 - Vitest for the critical-path unit tests
 - Vercel for hosting, SSG/ISR for every public page
 
@@ -34,13 +36,18 @@ Live: https://rns-portfolio-teal.vercel.app
 
 ```
 src/app/(site)            public, statically generated pages
-src/app/admin             auth-guarded editor, dashboard and draft preview
+src/app/admin             auth-guarded editor, dashboard, orders, licenses, models
 src/app/(site)/account    visitor signup, login and purchases
-src/app/api               auth, checkout, entitlement, payment webhooks
+src/app/order             the buyer's private /order/<token> status page
+src/app/api               auth, checkout, orders, license, entitlement, webhooks
 src/lib/db                schema, client, retrying queries
 src/lib/projects          slug, order, validation, revalidation, 3D model data
 src/lib/auth              guard, rate limit, password hashing, sessions
-src/lib/payments          provider adapters, webhook engine, entitlements
+src/lib/payments          provider adapters, webhook engine, entitlements, mode
+src/lib/orders            manual orders: tokens, request rules, admin templates
+src/lib/licensing         keys, Ed25519 tokens, activation rules, CORS, limits
+src/lib/models            the 3D model library and its usage rules
+src/lib/security          one secret, expanded into lookup and encryption keys
 src/lib/uploads           upload policy + sniffing, storage adapters
 src/components/model-stage lazy three.js viewer with a poster fallback
 src/themes                registry + one folder per theme
@@ -75,6 +82,13 @@ fall back to a built-in scene, so a theme can ship before any asset exists.
 Lighting presets live in `src/lib/projects/model.ts` as plain data; the admin
 picker and the viewer share them.
 
+**Admin → 3D models** is the library: every uploaded file with a preview, its
+size, upload date and the projects using it. A project points at a model by URL,
+so replacing a file rewrites those references and only then deletes the old
+file, and deleting a file a project still shows lists them and asks first.
+**Remove 3D model** on the project form puts that project back on its cover
+image without touching the scale, offset or lighting it already had.
+
 ## Local development
 
 ```bash
@@ -93,8 +107,9 @@ AUTH_SECRET=...                     # node -e "console.log(require('crypto').ran
 ADMIN_EMAIL=you@example.com
 ADMIN_PASSWORD_HASH=...             # npm run admin:hash -- "your-password"
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
-PAYMENT_PROVIDER=mock               # mock | polar | lemonsqueezy
-MOCK_PAYMENT_SECRET=local-mock-secret
+PAYMENT_PROVIDER=manual             # manual | mock | polar | lemonsqueezy
+node scripts/license-keys.mjs --write   # LICENSE_SECRET + the token signing key
+ALLOWED_ORIGINS=http://localhost:3000   # who may call /api/license/*
 # Optional: uploads default to ./uploads and need no configuration locally
 # BLOB_READ_WRITE_TOKEN=...         # set to use Vercel Blob instead
 ```
@@ -117,6 +132,25 @@ Log in at `/admin/login`. `.env.example` documents every variable.
   `processed_webhook_events`, and only a `paid` purchase unlocks the live URL
   and delivery note. Project pages stay static; the panel fetches entitlement
   client-side.
+
+## Selling Pro by hand
+
+Manual is the production default: a paid project page shows a themed Request Pro
+form (rate-limited, honeypotted) instead of a Buy button, keeps the free
+download visible, and gives the buyer a private `/order/<token>` page. You
+confirm payment yourself in **Admin → Orders**, generate a license key, and send
+the ready-made message.
+
+Keys are stored as an HMAC hash plus AES-256-GCM ciphertext under one
+`LICENSE_SECRET`; expiry is derived from the first activation, and the device
+limit is claimed in a single guarded update because `neon-http` has no
+transactions. Apps call `POST /api/license/activate` and `/verify`, and verify
+the returned Ed25519 token offline against `/api/license/public-key` for a seven
+day grace period.
+
+[licensing.md](docs/licensing.md) is the API reference with Chrome extension,
+web and Electron examples; [manual-payments.md](docs/manual-payments.md) is the
+order-to-key loop.
 
 ## Deploying later
 

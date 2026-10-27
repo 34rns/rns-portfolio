@@ -4,10 +4,9 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { dbModelStore } from "@/lib/models/db-store";
-import { describeUsage } from "@/lib/models/store";
+import { removeModel } from "@/lib/models/service";
 import { cleanModelName } from "@/lib/models/validate";
 import { revalidateProject } from "@/lib/projects/revalidate";
-import { deleteStoredFile } from "@/lib/uploads/storage";
 
 function back(params: Record<string, string>): never {
   const search = new URLSearchParams();
@@ -44,30 +43,19 @@ export async function deleteModelAction(formData: FormData): Promise<void> {
   const id = String(formData.get("modelId") ?? "");
   const force = formData.get("force") === "on";
 
-  const model = await dbModelStore.findModel(id);
-  if (!model) back({ error: "That model no longer exists." });
+  const result = await removeModel(dbModelStore, { id, force });
 
-  const usage = describeUsage(await dbModelStore.listModelUsage(), model.url);
-  if (usage.length > 0 && !force) {
-    back({ delete: model.id });
+  if (!result.ok) {
+    if (result.needsConfirmation) back({ delete: id });
+    back({ error: result.error });
   }
 
-  const slugs = usage.map((entry) => entry.projectSlug);
-  const detached = await dbModelStore.clearModelUrl(model.url);
-  await dbModelStore.deleteModel(model.id);
-
-  try {
-    await deleteStoredFile(model.url);
-  } catch (error) {
-    console.error("model file cleanup failed", error);
-  }
-
-  for (const slug of new Set(slugs)) revalidateProject(slug);
+  for (const slug of result.slugs) revalidateProject(slug);
   revalidatePath("/admin/models");
 
   back({
-    notice: detached
-      ? `Model deleted and removed from ${detached} project(s).`
+    notice: result.detached
+      ? `Model deleted and removed from ${result.detached} project(s).`
       : "Model deleted.",
   });
 }
