@@ -219,7 +219,6 @@ describe("rate limiting and lockout", () => {
   });
 
   it("locks out an address after ten rejected attempts", () => {
-    const keyHash = "c".repeat(64);
     for (let attempt = 0; attempt < 10; attempt += 1) {
       recordLicenseFailure({ ip: IP, keyHash: `attempt-${attempt}` });
     }

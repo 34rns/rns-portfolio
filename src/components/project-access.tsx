@@ -36,7 +36,6 @@ export function ProjectAccess({
   // timestamp from the server would measure the CDN's age, not the human's.
   const renderedAt = useRef(0);
   const [entitlement, setEntitlement] = useState<Entitlement | null>(null);
-  const [loading, setLoading] = useState(isPaid);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -66,9 +65,6 @@ export function ProjectAccess({
       .catch((cause: unknown) => {
         if (controller.signal.aborted) return;
         setError(cause instanceof Error ? cause.message : "Could not check your access.");
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
       });
 
     return () => controller.abort();
@@ -144,14 +140,16 @@ export function ProjectAccess({
   }
 
   function retry() {
-    setLoading(true);
+    setEntitlement(null);
     setError(null);
     setReloadKey((value) => value + 1);
   }
 
   const owned = Boolean(entitlement?.purchased);
-  const showRequest = !loading && !owned && mode === "manual";
-  const showBuy = !loading && !owned && mode !== "manual";
+  const showRequest = !owned && mode === "manual";
+  const showBuy = !owned && mode !== "manual";
+  /** Derived rather than stored, so the form is never hidden behind a fetch. */
+  const checking = isPaid && entitlement === null && !error;
 
   return (
     <section
@@ -164,11 +162,7 @@ export function ProjectAccess({
             {owned ? "Your access" : "Pro"}
           </h2>
           <p className="display mt-2 text-[1.6rem] font-medium">
-            {loading
-              ? "Checking your access…"
-              : owned
-                ? "You own this project"
-                : `Unlock Pro — ${priceLabel}`}
+            {owned ? "You own this project" : `Unlock Pro — ${priceLabel}`}
           </p>
         </div>
 
@@ -183,7 +177,7 @@ export function ProjectAccess({
         ) : null}
       </div>
 
-      {loading ? (
+      {checking ? (
         <p aria-live="polite" className="sr-only">
           Checking purchase status
         </p>
