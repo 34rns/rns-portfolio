@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { dbModelStore } from "@/lib/models/db-store";
+import { replaceModelFile } from "@/lib/models/service";
 import { isModelUrl } from "@/lib/models/validate";
 import { revalidateProject } from "@/lib/projects/revalidate";
-import { deleteStoredFile } from "@/lib/uploads/storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,10 +25,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const { id } = await params;
-  const model = await dbModelStore.findModel(id);
-  if (!model) {
-    return NextResponse.json({ error: "That model no longer exists." }, { status: 404 });
-  }
 
   let body: { action?: unknown; url?: unknown; size?: unknown };
   try {
@@ -49,28 +45,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const size =
     typeof body.size === "number" && Number.isFinite(body.size)
       ? Math.max(0, Math.round(body.size))
-      : model.size;
+      : null;
 
-  const oldUrl = model.url;
-  await dbModelStore.updateModel(model.id, { url, size });
+  const result = await replaceModelFile(dbModelStore, { id, url, size });
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: result.status });
+  }
 
-  let reassigned = 0;
-  if (oldUrl !== url) {
-    reassigned = await dbModelStore.reassignModelUrl(oldUrl, url);
-
+  if (result.reassigned > 0) {
     const usage = await dbModelStore.listModelUsage();
     for (const slug of new Set(usage.map((entry) => entry.projectSlug))) {
       revalidateProject(slug);
     }
-
-    try {
-      await deleteStoredFile(oldUrl);
-    } catch (error) {
-      // The swap already succeeded; a leftover file is a cleanup problem, not a
-      // broken site, so it is reported rather than rolled back.
-      console.error("model file cleanup failed", error);
-    }
   }
 
-  return NextResponse.json({ ok: true, reassigned });
+  return NextResponse.json({ ok: true, reassigned: result.reassigned });
 }

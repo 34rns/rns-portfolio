@@ -51,6 +51,9 @@ next-env.d.ts
 # Local test artifacts
 .auth-test.jar
 
+# Logical backups taken before migrations (they contain buyer emails)
+/backups/
+
 # Agent tooling installed by the Neon CLI
 .agents/
 .claude/
