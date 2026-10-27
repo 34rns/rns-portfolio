@@ -1,29 +1,30 @@
 import Link from "next/link";
-import { purchaseStatus, type PurchaseStatus } from "@/lib/db/schema";
-import { dbStore } from "@/lib/payments/db-store";
+import { CopyButton } from "@/components/copy-button";
+import { dbLicenseStore } from "@/lib/licensing/db-store";
+import { licenseStatus } from "@/lib/licensing/service";
+import { dbOrderStore } from "@/lib/orders/db-store";
+import { isOrderStatus } from "@/lib/orders/service";
 import {
-  ORDERS_PER_PAGE,
-  countOrders,
-  listAuditTrail,
-  listOrders,
-  listPaidProjects,
-} from "@/lib/payments/db-admin";
+  MESSAGE_CHANNELS,
+  buildOrderMessage,
+} from "@/lib/orders/template";
+import { ORDER_STATUSES, PAYMENT_METHODS, type OrderRow } from "@/lib/orders/store";
 import { formatPrice } from "@/lib/projects/view";
-import { ConfirmButton } from "../../confirm-button";
-import { grantAccessAction, revokeAccessAction } from "./actions";
+import { decryptValue } from "@/lib/security/secrets";
+import { siteUrl } from "@/lib/seo";
+import { generateLicenseAction, updateOrderAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
+const PER_PAGE = 20;
+
 type SearchParams = Promise<{
   status?: string;
+  q?: string;
   page?: string;
   notice?: string;
   error?: string;
 }>;
-
-function isStatus(value: string): value is PurchaseStatus {
-  return (purchaseStatus.enumValues as readonly string[]).includes(value);
-}
 
 function formatDate(value: Date) {
   return value.toLocaleString("en-GB", {
@@ -35,18 +36,18 @@ function formatDate(value: Date) {
   });
 }
 
-function StatusBadge({ status }: { status: PurchaseStatus }) {
+function StatusBadge({ status }: { status: OrderRow["status"] }) {
   const tone =
     status === "paid"
       ? "border-[#14171A] text-[#14171A]"
-      : status === "refunded"
+      : status === "cancelled"
         ? "border-[#B3261E] text-[#B3261E]"
-        : "border-[#D8D8D2] text-[#6B6B64]";
+        : status === "contacted"
+          ? "border-[#1B3BFF] text-[#1B3BFF]"
+          : "border-[#D8D8D2] text-[#6B6B64]";
 
   return (
-    <span
-      className={`border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide ${tone}`}
-    >
+    <span className={`border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide ${tone}`}>
       {status}
     </span>
   );
@@ -54,26 +55,32 @@ function StatusBadge({ status }: { status: PurchaseStatus }) {
 
 export default async function OrdersPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const filter = params.status && isStatus(params.status) ? params.status : undefined;
+  const filter = params.status && isOrderStatus(params.status) ? params.status : undefined;
+  const query = params.q?.trim() || undefined;
   const pageValue = Number.parseInt(params.page ?? "0", 10);
   const page = Number.isFinite(pageValue) && pageValue > 0 ? pageValue : 0;
 
-  const [orders, total, audit, paidProjects, commerce] = await Promise.all([
-    listOrders({ status: filter, page }),
-    countOrders({ status: filter }),
-    listAuditTrail(20),
-    listPaidProjects(),
-    dbStore.commerceStats(),
+  const [orders, total, counts, allCount] = await Promise.all([
+    dbOrderStore.listOrders({ status: filter, query, page, perPage: PER_PAGE }),
+    dbOrderStore.countOrders({ status: filter, query }),
+    Promise.all(
+      ORDER_STATUSES.map((status) => dbOrderStore.countOrders({ status })),
+    ),
+    dbOrderStore.countOrders({}),
   ]);
 
-  const first = orders.length === 0 ? 0 : page * ORDERS_PER_PAGE + 1;
-  const last = page * ORDERS_PER_PAGE + orders.length;
+  const licenses = await dbLicenseStore.listLicensesByOrderIds(orders.map((order) => order.id));
+  const licenseByOrder = new Map(licenses.map((license) => [license.orderId, license]));
+  const statusCounts = new Map(ORDER_STATUSES.map((status, index) => [status, counts[index]]));
+
+  const state = { status: filter ?? "", q: query ?? "" };
   const pageHref = (target: number) => {
     const search = new URLSearchParams();
     if (filter) search.set("status", filter);
+    if (query) search.set("q", query);
     if (target > 0) search.set("page", String(target));
-    const query = search.toString();
-    return `/admin/orders${query ? `?${query}` : ""}`;
+    const suffix = search.toString();
+    return `/admin/orders${suffix ? `?${suffix}` : ""}`;
   };
 
   return (
@@ -81,7 +88,9 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
       <header>
         <h1 className="text-2xl font-medium tracking-tight">Orders</h1>
         <p className="mt-1 text-sm text-[#6B6B64]">
-          Every checkout attempt and manual grant, newest first.
+          Requests from the Request Pro form. Confirm payment yourself, record the
+          agreed amount, then generate the license key and send the buyer their
+          message.
         </p>
       </header>
 
@@ -98,115 +107,58 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
 
       <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 border-y border-[#E1E1DA] py-3 text-sm">
         <span>
-          <span className="mono text-[#6B6B64]">Paid orders </span>
-          <span className="tabular-nums">{commerce.paidOrders}</span>
+          <span className="mono text-[#6B6B64]">All </span>
+          <span className="tabular-nums">{allCount}</span>
         </span>
-        <span>
-          <span className="mono text-[#6B6B64]">Revenue </span>
-          <span className="tabular-nums">
-            {commerce.revenue.length === 0
-              ? formatPrice(0, "USD")
-              : commerce.revenue
-                  .map((entry) => formatPrice(entry.cents, entry.currency))
-                  .join(" + ")}
+        {ORDER_STATUSES.map((status) => (
+          <span key={status}>
+            <span className="mono text-[#6B6B64]">{status} </span>
+            <span className="tabular-nums">{statusCounts.get(status) ?? 0}</span>
           </span>
-        </span>
-        <span>
-          <span className="mono text-[#6B6B64]">Visitor accounts </span>
-          <span className="tabular-nums">{commerce.signups}</span>
-        </span>
+        ))}
       </div>
-      <p className="mt-2 text-xs text-[#6B6B64]">
-        Manual grants are $0 rows and stay out of revenue and order counts.
-      </p>
 
-      <form
-        action={grantAccessAction}
-        className="mt-8 grid gap-3 border border-[#E1E1DA] bg-white p-5 sm:grid-cols-2"
-      >
-        <div className="sm:col-span-2">
-          <h2 className="text-sm font-medium">Grant access</h2>
-          <p className="mt-1 text-sm text-[#6B6B64]">
-            Comp a visitor account. The action is written to the audit trail with
-            your email.
-          </p>
-        </div>
-
+      <form action="/admin/orders" className="mt-5 flex flex-wrap items-end gap-3">
         <label className="block text-sm">
-          <span className="mono text-[#6B6B64]">Project</span>
-          <select
-            name="projectId"
-            required
-            defaultValue={paidProjects[0]?.id ?? ""}
-            className="mt-1 w-full border border-[#D8D8D2] bg-white px-2 py-1.5"
-          >
-            {paidProjects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.title} — {formatPrice(project.priceCents ?? 0, project.currency)}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="block text-sm">
-          <span className="mono text-[#6B6B64]">Buyer email</span>
+          <span className="mono text-[#6B6B64]">Search</span>
           <input
-            type="email"
-            name="email"
-            required
-            autoComplete="off"
-            placeholder="buyer@example.com"
-            className="mt-1 w-full border border-[#D8D8D2] bg-white px-2 py-1.5"
+            name="q"
+            defaultValue={query ?? ""}
+            placeholder="name, email or project"
+            className="mt-1 w-64 border border-[#D8D8D2] bg-white px-2 py-1.5"
           />
         </label>
-
-        <label className="block text-sm sm:col-span-2">
-          <span className="mono text-[#6B6B64]">Reason (optional)</span>
-          <input
-            name="reason"
-            maxLength={500}
-            placeholder="Comped for a client, warranty replacement, …"
-            className="mt-1 w-full border border-[#D8D8D2] bg-white px-2 py-1.5"
-          />
-        </label>
-
-        <input type="hidden" name="status" value={filter ?? ""} />
-        <input type="hidden" name="page" value={page > 0 ? String(page) : ""} />
-
-        <div className="sm:col-span-2">
-          <button
-            type="submit"
-            disabled={paidProjects.length === 0}
-            className="bg-[#14171A] px-4 py-2 text-sm text-white hover:opacity-90 disabled:opacity-40"
-          >
-            Grant access
-          </button>
-          {paidProjects.length === 0 ? (
-            <p className="mt-2 text-xs text-[#6B6B64]">
-              Mark a project as paid before granting access.
-            </p>
-          ) : null}
-        </div>
+        {filter ? <input type="hidden" name="status" value={filter} /> : null}
+        <button type="submit" className="border border-[#14171A] px-3 py-1.5 text-sm">
+          Search
+        </button>
+        {query ? (
+          <Link href={filter ? `/admin/orders?status=${filter}` : "/admin/orders"} className="text-sm underline">
+            Clear
+          </Link>
+        ) : null}
       </form>
 
-      <nav aria-label="Filter orders" className="mt-8 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+      <nav aria-label="Filter orders" className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
         <Link
-          href="/admin/orders"
+          href={query ? `/admin/orders?q=${encodeURIComponent(query)}` : "/admin/orders"}
           className={filter ? "underline text-[#6B6B64]" : "font-medium underline"}
         >
           All
         </Link>
-        {purchaseStatus.enumValues.map((status) => (
-          <Link
-            key={status}
-            href={`/admin/orders?status=${status}`}
-            className={
-              filter === status ? "font-medium underline" : "underline text-[#6B6B64]"
-            }
-          >
-            {status}
-          </Link>
-        ))}
+        {ORDER_STATUSES.map((status) => {
+          const search = new URLSearchParams({ status });
+          if (query) search.set("q", query);
+          return (
+            <Link
+              key={status}
+              href={`/admin/orders?${search.toString()}`}
+              className={filter === status ? "font-medium underline" : "underline text-[#6B6B64]"}
+            >
+              {status}
+            </Link>
+          );
+        })}
       </nav>
 
       {orders.length === 0 ? (
@@ -214,83 +166,283 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
           <p className="text-sm text-[#6B6B64]">
             {total > 0
               ? "Nothing on this page — go back a page."
-              : filter
-                ? `No ${filter} orders yet.`
-                : "No orders yet."}
+              : filter || query
+                ? "No orders match that filter."
+                : "No requests yet."}
           </p>
         </div>
       ) : (
-        <ul className="mt-4 divide-y divide-[#E1E1DA] border-y border-[#E1E1DA]">
-          {orders.map((order) => (
-            <li
-              key={order.id}
-              className="grid gap-3 py-4 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_auto] md:items-start md:gap-6"
-            >
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{order.buyerEmail}</p>
-                <p className="mono mt-1 truncate text-[#6B6B64]">
-                  {order.buyerName ? `${order.buyerName} · ` : ""}
-                  {order.provider} · {order.reference}
-                </p>
-              </div>
+        <ul className="mt-6 grid gap-5">
+          {orders.map((order) => {
+            const license = licenseByOrder.get(order.id) ?? null;
+            const status = license ? licenseStatus(license) : null;
 
-              <div className="min-w-0">
-                <Link
-                  href={`/admin/projects/${order.projectId}`}
-                  className="block truncate text-sm hover:underline"
-                >
-                  {order.projectTitle}
-                </Link>
-                <p className="mono mt-1 truncate text-[#6B6B64]">
-                  {formatDate(order.createdAt)}
-                </p>
-              </div>
+            let buyerToken: string | null = null;
+            try {
+              buyerToken = decryptValue(order.tokenCiphertext);
+            } catch {
+              buyerToken = null;
+            }
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 md:flex-col md:items-end">
-                <div className="flex items-center gap-2">
+            let key: string | null = null;
+            if (license) {
+              try {
+                key = decryptValue(license.keyCiphertext);
+              } catch {
+                key = null;
+              }
+            }
+
+            const orderUrl = buyerToken ? `${siteUrl()}/order/${buyerToken}` : "";
+            const amount = order.amountCents != null
+              ? formatPrice(order.amountCents, order.currency)
+              : "No amount agreed";
+
+            return (
+              <li key={order.id} className="border border-[#E1E1DA] bg-white">
+                <div className="flex flex-wrap items-start justify-between gap-4 p-5">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">
+                      {order.name} ·{" "}
+                      <a href={`mailto:${order.email}`} className="underline">
+                        {order.email}
+                      </a>
+                    </p>
+                    <p className="mono mt-1 truncate text-[#6B6B64]">
+                      {order.projectTitle}
+                      {order.method ? ` · ${order.method}` : ""} · {amount} ·{" "}
+                      {formatDate(order.createdAt)}
+                    </p>
+                    <p className="mono mt-1 truncate text-[#6B6B64]">
+                      order {order.id.slice(0, 8)}
+                      {order.notes ? ` · note: ${order.notes}` : ""}
+                    </p>
+                  </div>
                   <StatusBadge status={order.status} />
-                  <span className="text-sm tabular-nums">
-                    {order.provider === "manual"
-                      ? "Comped"
-                      : formatPrice(order.amountCents, order.currency)}
-                  </span>
                 </div>
 
-                {order.status === "paid" ? (
-                  <form action={revokeAccessAction} className="flex items-center gap-2">
-                    <input type="hidden" name="purchaseId" value={order.id} />
-                    <input type="hidden" name="status" value={filter ?? ""} />
-                    <input type="hidden" name="page" value={page > 0 ? String(page) : ""} />
-                    <input
-                      name="reason"
-                      maxLength={500}
-                      placeholder="Reason"
-                      aria-label={`Reason for revoking ${order.buyerEmail}`}
-                      className="w-24 border border-[#D8D8D2] bg-white px-2 py-1 text-xs"
-                    />
-                    <ConfirmButton
-                      message={`Revoke ${order.buyerEmail}'s access to ${order.projectTitle}?`}
-                      className="text-xs text-[#B3261E] underline"
-                    >
-                      Revoke
-                    </ConfirmButton>
-                  </form>
+                {order.message ? (
+                  <p className="border-t border-[#E1E1DA] whitespace-pre-wrap px-5 py-4 text-sm text-[#3D3D39]">
+                    {order.message}
+                  </p>
                 ) : null}
-              </div>
-            </li>
-          ))}
+
+                <div className="grid gap-6 border-t border-[#E1E1DA] p-5">
+                  <form action={updateOrderAction} className="grid gap-3 sm:grid-cols-4">
+                    <input type="hidden" name="orderId" value={order.id} />
+                    <input type="hidden" name="filterStatus" value={state.status} />
+                    <input type="hidden" name="filterQuery" value={state.q} />
+                    <input type="hidden" name="filterPage" value={page > 0 ? String(page) : ""} />
+
+                    <label className="block text-sm">
+                      <span className="mono text-[#6B6B64]">Status</span>
+                      <select
+                        name="status"
+                        defaultValue={order.status}
+                        className="mt-1 w-full border border-[#D8D8D2] bg-white px-2 py-1.5"
+                      >
+                        {ORDER_STATUSES.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="block text-sm">
+                      <span className="mono text-[#6B6B64]">Agreed amount</span>
+                      <input
+                        name="amount"
+                        defaultValue={
+                          order.amountCents != null ? (order.amountCents / 100).toString() : ""
+                        }
+                        placeholder="19.00"
+                        className="mt-1 w-full border border-[#D8D8D2] bg-white px-2 py-1.5 tabular-nums"
+                      />
+                    </label>
+
+                    <label className="block text-sm">
+                      <span className="mono text-[#6B6B64]">Currency</span>
+                      <input
+                        name="currency"
+                        defaultValue={order.currency}
+                        maxLength={3}
+                        className="mt-1 w-full border border-[#D8D8D2] bg-white px-2 py-1.5 uppercase"
+                      />
+                    </label>
+
+                    <label className="block text-sm">
+                      <span className="mono text-[#6B6B64]">Notes (private)</span>
+                      <input
+                        name="notes"
+                        defaultValue={order.notes ?? ""}
+                        maxLength={2000}
+                        placeholder="Paid by bKash, key sent on WhatsApp"
+                        className="mt-1 w-full border border-[#D8D8D2] bg-white px-2 py-1.5"
+                      />
+                    </label>
+
+                    <div className="sm:col-span-4 flex flex-wrap items-center gap-4">
+                      <button
+                        type="submit"
+                        className="bg-[#14171A] px-4 py-2 text-sm text-white hover:opacity-90"
+                      >
+                        Save order
+                      </button>
+                      {orderUrl ? (
+                        <a
+                          href={orderUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sm underline"
+                        >
+                          Open the buyer&apos;s page
+                        </a>
+                      ) : (
+                        <span className="text-xs text-[#B3261E]">
+                          Order link is unreadable with the current LICENSE_SECRET.
+                        </span>
+                      )}
+                    </div>
+                  </form>
+
+                  <div className="border-t border-[#E1E1DA] pt-5">
+                    {license ? (
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                        <span className="mono text-[#6B6B64]">License</span>
+                        <span className="border border-[#14171A] px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide">
+                          {status}
+                        </span>
+                        <span className="tabular-nums">
+                          {license.activationCount}/{license.maxDevices} devices
+                        </span>
+                        <span className="text-[#6B6B64]">
+                          {license.type === "permanent"
+                            ? "permanent"
+                            : `${license.days} days from first activation`}
+                        </span>
+                        <Link href={`/admin/licenses?reveal=${license.id}`} className="underline">
+                          Re-show key
+                        </Link>
+                      </div>
+                    ) : (
+                      <form action={generateLicenseAction} className="grid gap-3 sm:grid-cols-4">
+                        <input type="hidden" name="orderId" value={order.id} />
+                        <p className="sm:col-span-4 text-sm">
+                          <span className="font-medium">Generate license key</span>{" "}
+                          <span className="text-[#6B6B64]">
+                            — unlocks {order.projectSlug}, shown once on the licenses page.
+                          </span>
+                        </p>
+
+                        <label className="block text-sm">
+                          <span className="mono text-[#6B6B64]">Type</span>
+                          <select
+                            name="licenseType"
+                            defaultValue="permanent"
+                            className="mt-1 w-full border border-[#D8D8D2] bg-white px-2 py-1.5"
+                          >
+                            <option value="permanent">permanent</option>
+                            <option value="timelimited">time-limited</option>
+                          </select>
+                        </label>
+
+                        <label className="block text-sm">
+                          <span className="mono text-[#6B6B64]">Days (if limited)</span>
+                          <input
+                            name="days"
+                            defaultValue="365"
+                            inputMode="numeric"
+                            className="mt-1 w-full border border-[#D8D8D2] bg-white px-2 py-1.5 tabular-nums"
+                          />
+                        </label>
+
+                        <label className="block text-sm">
+                          <span className="mono text-[#6B6B64]">Max devices</span>
+                          <input
+                            name="maxDevices"
+                            defaultValue="2"
+                            inputMode="numeric"
+                            className="mt-1 w-full border border-[#D8D8D2] bg-white px-2 py-1.5 tabular-nums"
+                          />
+                        </label>
+
+                        <label className="block text-sm">
+                          <span className="mono text-[#6B6B64]">Note</span>
+                          <input
+                            name="note"
+                            placeholder={`Order ${order.id.slice(0, 8)}`}
+                            className="mt-1 w-full border border-[#D8D8D2] bg-white px-2 py-1.5"
+                          />
+                        </label>
+
+                        <div className="sm:col-span-4">
+                          <button
+                            type="submit"
+                            className="border border-[#14171A] px-4 py-2 text-sm hover:bg-[#14171A] hover:text-white"
+                          >
+                            Generate license key
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+
+                  {buyerToken ? (
+                    <details className="border-t border-[#E1E1DA] pt-5">
+                      <summary className="cursor-pointer text-sm font-medium">
+                        Message template
+                      </summary>
+                      <div className="mt-3 grid gap-3">
+                        {MESSAGE_CHANNELS.map((channel) => {
+                          const message = buildOrderMessage({
+                            channel: channel.id,
+                            order,
+                            projectTitle: order.projectTitle,
+                            key,
+                            orderUrl,
+                          });
+                          const text = message.subject
+                            ? `Subject: ${message.subject}\n\n${message.body}`
+                            : message.body;
+
+                          return (
+                            <details key={channel.id} className="border border-[#E1E1DA]">
+                              <summary className="cursor-pointer px-3 py-2 text-sm">
+                                {channel.label}
+                              </summary>
+                              <div className="border-t border-[#E1E1DA] p-3">
+                                <pre className="whitespace-pre-wrap font-sans text-sm leading-[1.6]">
+                                  {text}
+                                </pre>
+                                <div className="mt-3">
+                                  <CopyButton value={text} label={`Copy ${channel.label} message`} />
+                                </div>
+                              </div>
+                            </details>
+                          );
+                        })}
+                        <p className="text-xs text-[#6B6B64]">
+                          {key
+                            ? "The key is included. Payment methods on file: " +
+                              PAYMENT_METHODS.join(", ") +
+                              "."
+                            : "Generate a key first and the message will include it."}
+                        </p>
+                      </div>
+                    </details>
+                  ) : null}
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
 
       {total > 0 ? (
-        <nav
-          aria-label="Order pages"
-          className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm"
-        >
+        <nav aria-label="Order pages" className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
           <span className="mono text-[#6B6B64]">
-            {orders.length === 0
-              ? `No orders on this page · ${total} total`
-              : `Showing ${first}–${last} of ${total}`}
+            {`${page * PER_PAGE + 1}–${page * PER_PAGE + orders.length} of ${total}`}
           </span>
           <span className="flex gap-4">
             {page > 0 ? (
@@ -298,7 +450,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
                 Newer
               </Link>
             ) : null}
-            {last < total ? (
+            {page * PER_PAGE + orders.length < total ? (
               <Link href={pageHref(page + 1)} className="underline">
                 Older
               </Link>
@@ -306,54 +458,6 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
           </span>
         </nav>
       ) : null}
-
-      <section className="mt-12">
-        <h2 className="text-sm font-medium">Audit trail</h2>
-        <p className="mt-1 text-sm text-[#6B6B64]">
-          Manual grants and revocations, newest first.
-        </p>
-
-        {audit.length === 0 ? (
-          <p className="mt-4 border border-dashed border-[#D8D8D2] p-8 text-center text-sm text-[#6B6B64]">
-            No manual access changes yet.
-          </p>
-        ) : (
-          <ul className="mt-4 divide-y divide-[#E1E1DA] border-y border-[#E1E1DA]">
-            {audit.map((entry) => (
-              <li key={entry.id} className="grid gap-2 py-3 text-sm sm:grid-cols-[auto_1fr_auto]">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`border px-1.5 py-0.5 text-[0.65rem] uppercase tracking-wide ${
-                      entry.action === "grant"
-                        ? "border-[#14171A] text-[#14171A]"
-                        : "border-[#B3261E] text-[#B3261E]"
-                    }`}
-                  >
-                    {entry.action}
-                  </span>
-                  <span className="mono text-[#6B6B64]">
-                    {formatDate(entry.createdAt)}
-                  </span>
-                </div>
-
-                <div className="min-w-0">
-                  <p className="truncate">
-                    {entry.buyerEmail} · {entry.projectTitle}
-                  </p>
-                  <p className="mono mt-0.5 truncate text-[#6B6B64]">
-                    By {entry.actorEmail}
-                    {entry.reason ? ` — ${entry.reason}` : ""}
-                  </p>
-                </div>
-
-                <span className="tabular-nums sm:text-right">
-                  {entry.action === "grant" ? "Comped" : formatPrice(entry.amountCents, entry.currency)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
     </div>
   );
 }

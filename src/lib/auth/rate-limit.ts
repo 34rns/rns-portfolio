@@ -6,6 +6,8 @@ export type RateLimitResult = {
 
 export type RateLimiter = {
   check(key: string): RateLimitResult;
+  /** Forget one key, e.g. after it proved itself with a good key. */
+  clear(key: string): void;
   reset(): void;
 };
 
@@ -41,6 +43,9 @@ export function createRateLimiter({
 
       entry.count += 1;
       return { allowed: true, remaining: limit - entry.count, retryAfterMs: 0 };
+    },
+    clear(key) {
+      hits.delete(key);
     },
     reset() {
       hits.clear();

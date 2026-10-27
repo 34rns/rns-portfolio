@@ -97,6 +97,7 @@ export async function saveProject(
     tags: data.tags,
     liveUrl: data.liveUrl || null,
     repoUrl: data.repoUrl || null,
+    downloadUrl: data.downloadUrl || null,
     year: data.year,
     status: data.status,
     placement: data.placement,

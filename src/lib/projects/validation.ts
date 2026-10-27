@@ -49,6 +49,8 @@ export const projectInputSchema = z
     tags: z.array(z.string().trim().min(1).max(40)).max(12),
     liveUrl: httpUrl,
     repoUrl: httpUrl,
+    /** Free public download, shown even on a paid project. */
+    downloadUrl: httpUrl,
     year: z.coerce.number().int().min(2000).max(2100),
     status: z.enum(["draft", "published"]),
     placement: z.enum(["featured", "unlisted"]),
@@ -104,6 +106,7 @@ export function parseProjectForm(
       .filter(Boolean),
     liveUrl: String(formData.get("liveUrl") ?? ""),
     repoUrl: String(formData.get("repoUrl") ?? ""),
+    downloadUrl: String(formData.get("downloadUrl") ?? ""),
     year: String(formData.get("year") ?? ""),
     status: String(formData.get("status") ?? "draft"),
     placement: String(formData.get("placement") ?? "featured"),

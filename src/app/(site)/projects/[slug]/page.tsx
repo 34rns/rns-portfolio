@@ -6,6 +6,7 @@ import {
   getPublishedProjectSlugs,
 } from "@/lib/db/queries";
 import { ProjectAccess } from "@/components/project-access";
+import { paymentMode } from "@/lib/payments/mode";
 import { formatPrice, toProjectView } from "@/lib/projects/view";
 import { getTheme } from "@/themes/registry";
 import { themeVars } from "@/themes/style";
@@ -65,6 +66,9 @@ export default async function ProjectPage({ params }: RouteParams) {
   // Buyer-only content never enters the static HTML: the URL is stripped here
   // and the delivery note is never part of the view model.
   const safeView = view.isPaid ? { ...view, liveUrl: null } : view;
+  // Sale mode is a server-side decision: the form ships in the static HTML, so
+  // this must stay a stable build-time value, not a per-request one.
+  const mode = paymentMode();
   const access =
     view.isPaid && view.priceCents
       ? (
@@ -72,6 +76,8 @@ export default async function ProjectPage({ params }: RouteParams) {
             slug={view.slug}
             priceLabel={formatPrice(view.priceCents, view.currency)}
             isPaid
+            downloadUrl={view.downloadUrl}
+            mode={mode}
           />
         )
       : null;

@@ -23,6 +23,22 @@ export const purchaseStatus = pgEnum("purchase_status", [
   "refunded",
 ]);
 export const purchaseAuditAction = pgEnum("purchase_audit_action", ["grant", "revoke"]);
+export const orderStatus = pgEnum("order_status", [
+  "requested",
+  "contacted",
+  "paid",
+  "cancelled",
+]);
+export const licenseType = pgEnum("license_type", ["permanent", "timelimited"]);
+export const licenseEventAction = pgEnum("license_event_action", [
+  "created",
+  "activated",
+  "revoked",
+  "unrevoked",
+  "extended",
+  "devices_reset",
+  "key_shown",
+]);
 
 export type ThemeOptions = {
   accent?: string;
@@ -51,6 +67,11 @@ export const projects = pgTable("projects", {
   tags: text("tags").array().notNull().default(sql`'{}'::text[]`),
   liveUrl: text("live_url"),
   repoUrl: text("repo_url"),
+  /**
+   * Free public download, shown on the page even when the project is paid:
+   * the app is free, and only the Pro unlock is sold.
+   */
+  downloadUrl: text("download_url"),
   year: integer("year").notNull(),
   status: projectStatus("status").notNull().default("draft"),
   placement: projectPlacement("placement").notNull().default("featured"),
@@ -106,6 +127,131 @@ export const purchases = pgTable(
     index("purchases_user_idx").on(table.userId),
     index("purchases_project_idx").on(table.projectId),
   ],
+);
+
+/**
+ * One row per "Request Pro" submission. There is no account involved, so
+ * `tokenHash` is the only credential: the buyer's `/order/<token>` page is
+ * addressed by it, and `tokenCiphertext` lets an admin link back to that page.
+ */
+export const orders = pgTable(
+  "orders",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tokenHash: text("token_hash").notNull(),
+    tokenCiphertext: text("token_ciphertext").notNull(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    message: text("message"),
+    /** Preferred payment method, as chosen by the buyer. */
+    method: text("method"),
+    status: orderStatus("status").notNull().default("requested"),
+    /** Agreed amount, set by an admin once payment is arranged. */
+    amountCents: integer("amount_cents"),
+    currency: text("currency").notNull().default("USD"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("orders_token_hash_idx").on(table.tokenHash),
+    index("orders_project_idx").on(table.projectId),
+    index("orders_status_idx").on(table.status),
+    index("orders_created_idx").on(table.createdAt),
+  ],
+);
+
+/**
+ * The 3D model library. Projects point at a model by URL (projects.model_url),
+ * so a model can be shared and replacing a file keeps every reference intact.
+ */
+export const models = pgTable(
+  "models",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    url: text("url").notNull(),
+    /** Bytes, when the upload route reported them. */
+    size: integer("size"),
+    contentType: text("content_type"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("models_url_idx").on(table.url)],
+);
+
+/**
+ * A sold Pro unlock. The plain key is never stored: `keyLookup` is an HMAC of
+ * it for lookups and `keyCiphertext` is AES-GCM so an admin can re-show a lost
+ * key. Expiry is derived from `firstActivatedAt` + `days`, never stored, so
+ * "counted from first activation" cannot drift.
+ */
+export const licenses = pgTable(
+  "licenses",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    keyLookup: text("key_lookup").notNull(),
+    keyCiphertext: text("key_ciphertext").notNull(),
+    /** Slugs this key unlocks. Empty means every project (a bundle). */
+    projectSlugs: text("project_slugs").array().notNull().default(sql`'{}'::text[]`),
+    type: licenseType("type").notNull().default("permanent"),
+    /** Time-limited only: length in days, counted from first activation. */
+    days: integer("days"),
+    /** Optional deadline for the first activation. */
+    activateBy: timestamp("activate_by", { withTimezone: true }),
+    maxDevices: integer("max_devices").notNull().default(2),
+    /** Denormalised so the device limit can be claimed in one guarded update. */
+    activationCount: integer("activation_count").notNull().default(0),
+    firstActivatedAt: timestamp("first_activated_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    revokedReason: text("revoked_reason"),
+    note: text("note"),
+    orderId: uuid("order_id").references(() => orders.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("licenses_key_lookup_idx").on(table.keyLookup),
+    index("licenses_created_idx").on(table.createdAt),
+    index("licenses_order_idx").on(table.orderId),
+  ],
+);
+
+/** One row per device that ever activated a key. */
+export const licenseActivations = pgTable(
+  "license_activations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    licenseId: uuid("license_id")
+      .notNull()
+      .references(() => licenses.id, { onDelete: "cascade" }),
+    deviceId: text("device_id").notNull(),
+    deviceName: text("device_name"),
+    firstSeen: timestamp("first_seen", { withTimezone: true }).notNull().defaultNow(),
+    lastSeen: timestamp("last_seen", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("license_activations_device_idx").on(table.licenseId, table.deviceId),
+  ],
+);
+
+/** Every admin action on a key, oldest to newest, nothing inferred. */
+export const licenseEvents = pgTable(
+  "license_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    licenseId: uuid("license_id")
+      .notNull()
+      .references(() => licenses.id, { onDelete: "cascade" }),
+    action: licenseEventAction("action").notNull(),
+    actorEmail: text("actor_email").notNull().default("system"),
+    detail: text("detail"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("license_events_created_idx").on(table.createdAt)],
 );
 
 /**
@@ -169,3 +315,12 @@ export type NewProject = typeof projects.$inferInsert;
 export type PurchaseRecord = typeof purchases.$inferSelect;
 export type PurchaseStatus = (typeof purchaseStatus.enumValues)[number];
 export type PurchaseAuditRecord = typeof purchaseAuditLog.$inferSelect;
+export type OrderRecordRow = typeof orders.$inferSelect;
+export type NewOrderRow = typeof orders.$inferInsert;
+export type OrderStatusValue = (typeof orderStatus.enumValues)[number];
+export type ModelRecordRow = typeof models.$inferSelect;
+export type NewModelRow = typeof models.$inferInsert;
+export type LicenseRecordRow = typeof licenses.$inferSelect;
+export type NewLicenseRow = typeof licenses.$inferInsert;
+export type ActivationRecordRow = typeof licenseActivations.$inferSelect;
+export type LicenseEventRecordRow = typeof licenseEvents.$inferSelect;

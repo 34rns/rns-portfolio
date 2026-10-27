@@ -17,6 +17,8 @@ export type ProjectView = {
   tags: string[];
   liveUrl: string | null;
   repoUrl: string | null;
+  /** Free public download; shown even on a paid project. */
+  downloadUrl: string | null;
   year: number;
   accent: string | null;
   isPaid: boolean;
@@ -36,6 +38,7 @@ export function toProjectView(project: ProjectRecord): ProjectView {
     tags: project.tags ?? [],
     liveUrl: project.liveUrl,
     repoUrl: project.repoUrl,
+    downloadUrl: project.downloadUrl,
     year: project.year,
     accent: project.themeOptions?.accent ?? null,
     isPaid: project.isPaid,
