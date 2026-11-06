@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { site } from "@/content/site";
 import type { ProjectView } from "@/lib/projects/view";
 import { Hero } from "./components/hero";
@@ -26,28 +25,22 @@ const capabilities = [
 
 function SiteHeader() {
   return (
-    <header className="mx-auto flex max-w-[1440px] items-center justify-between px-5 pt-7 md:px-10">
-      <Link
-        href="/"
-        className="display hidden text-[1.35rem] font-semibold md:block"
-      >
-        RNS
-      </Link>
+    <header className="mx-auto flex max-w-[1440px] items-center justify-end px-5 pt-7 md:px-10">
       <nav
         aria-label="Primary"
         className="ml-auto flex items-center gap-5 text-[0.95rem]"
       >
-        <a href="#work" className="nav-link">
+        <a href="#work" className="nav-link inline-flex min-h-11 items-center">
           Work
         </a>
-        <a href="#about" className="nav-link">
+        <a href="#about" className="nav-link inline-flex min-h-11 items-center">
           About
         </a>
         <a
           href={site.github}
           target="_blank"
           rel="noreferrer"
-          className="nav-link"
+          className="nav-link inline-flex min-h-11 items-center"
           data-cursor="view"
         >
           GitHub
