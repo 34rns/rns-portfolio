@@ -1,0 +1,18 @@
+## main...origin/main
+ M README.md
+ M scripts/add-projects.ts
+ M src/app/layout.tsx
+ M src/components/smart-image.tsx
+ M src/lib/projects/content.ts
+ M src/lib/projects/links.ts
+ M src/themes/professional/components/work-index.tsx
+ M src/themes/professional/landing.tsx
+ M src/themes/registry.ts
+ M tests/content-entries.test.ts
+ M tests/theme-registry.test.ts
+?? docs/design/keycap.md
+?? public/projects/folderdock/
+?? public/projects/shobdo/
+?? src/themes/folderdock/
+?? src/themes/keycap/
+?? tests/keycap.test.ts

@@ -1,0 +1,411 @@
+a6b427f | 34rns <siamraiyan3@gmail.com> | 2026-10-27T21:17:47+06:00 | Ship the Request Pro form in the page's HTML
+
+M	src/components/project-access.tsx
+M	tests/licensing-http.test.ts
+794c874 | 34rns <siamraiyan3@gmail.com> | 2026-10-27T21:05:22+06:00 | Document the licensing flow and cover it with tests
+
+M	.env.example
+M	.gitignore
+M	README.md
+A	docs/licensing.md
+A	docs/manual-payments.md
+M	package.json
+A	scripts/backup.ts
+A	scripts/license-keys.mjs
+M	src/app/admin/(panel)/models/actions.ts
+M	src/app/api/admin/models/[id]/route.ts
+M	src/lib/licensing/limits.ts
+A	src/lib/models/service.ts
+M	tests/entitlements.test.ts
+A	tests/helpers/memory-license-store.ts
+A	tests/helpers/memory-model-store.ts
+A	tests/helpers/memory-order-store.ts
+A	tests/licensing-http.test.ts
+A	tests/licensing-keys.test.ts
+A	tests/licensing-service.test.ts
+A	tests/licensing-token.test.ts
+A	tests/manual-orders.test.ts
+A	tests/model-library.test.ts
+d2e0a7d | 34rns <siamraiyan3@gmail.com> | 2026-10-27T20:44:18+06:00 | Give 3D models a library of their own
+
+A	src/app/admin/(panel)/models/actions.ts
+A	src/app/admin/(panel)/models/model-uploader.tsx
+A	src/app/admin/(panel)/models/page.tsx
+M	src/app/admin/(panel)/upload-field.tsx
+A	src/app/api/admin/models/[id]/route.ts
+A	src/app/api/admin/models/route.ts
+A	src/lib/models/db-store.ts
+A	src/lib/models/store.ts
+A	src/lib/models/validate.ts
+M	src/lib/uploads/storage.ts
+e1a4aa5 | 34rns <siamraiyan3@gmail.com> | 2026-10-27T20:44:17+06:00 | Verify licenses offline with signed tokens
+
+A	src/app/admin/(panel)/licenses/actions.ts
+A	src/app/admin/(panel)/licenses/page.tsx
+A	src/app/api/license/activate/route.ts
+A	src/app/api/license/public-key/route.ts
+A	src/app/api/license/verify/route.ts
+9c01b75 | 34rns <siamraiyan3@gmail.com> | 2026-10-27T20:43:52+06:00 | Sell Pro by hand with manual orders and license keys
+
+A	drizzle/0004_majestic_proudstar.sql
+A	drizzle/meta/0004_snapshot.json
+M	drizzle/meta/_journal.json
+M	src/app/(site)/projects/[slug]/page.tsx
+A	src/app/admin/(panel)/checkouts/actions.ts
+A	src/app/admin/(panel)/checkouts/page.tsx
+M	src/app/admin/(panel)/layout.tsx
+M	src/app/admin/(panel)/orders/actions.ts
+M	src/app/admin/(panel)/orders/page.tsx
+M	src/app/admin/(panel)/project-form.tsx
+M	src/app/admin/(panel)/projects/[id]/page.tsx
+M	src/app/admin/(panel)/projects/new/page.tsx
+M	src/app/admin/actions.ts
+A	src/app/api/orders/route.ts
+A	src/app/order/[token]/page.tsx
+A	src/components/copy-button.tsx
+M	src/components/project-access.tsx
+M	src/lib/auth/rate-limit.ts
+M	src/lib/db/schema.ts
+A	src/lib/http/ip.ts
+A	src/lib/licensing/admin.ts
+A	src/lib/licensing/cors.ts
+A	src/lib/licensing/db-store.ts
+A	src/lib/licensing/keys.ts
+A	src/lib/licensing/limits.ts
+A	src/lib/licensing/request.ts
+A	src/lib/licensing/respond.ts
+A	src/lib/licensing/service.ts
+A	src/lib/licensing/store.ts
+A	src/lib/licensing/token.ts
+A	src/lib/orders/db-store.ts
+A	src/lib/orders/service.ts
+A	src/lib/orders/store.ts
+A	src/lib/orders/template.ts
+A	src/lib/orders/token.ts
+A	src/lib/payments/mode.ts
+M	src/lib/projects/validation.ts
+M	src/lib/projects/view.ts
+A	src/lib/security/secrets.ts
+b1938a5 | 34rns <siamraiyan3@gmail.com> | 2026-10-25T17:33:44+06:00 | Add Loupe and QuickKit as portfolio projects
+
+A	public/projects/loupe/1.webp
+A	public/projects/loupe/2.webp
+A	public/projects/loupe/3.webp
+A	public/projects/loupe/4.webp
+A	public/projects/loupe/cover.webp
+A	public/projects/quickkit/1.webp
+A	public/projects/quickkit/2.webp
+A	public/projects/quickkit/3.webp
+A	public/projects/quickkit/4.webp
+A	public/projects/quickkit/cover.webp
+A	scripts/add-projects.ts
+A	src/components/release-version.tsx
+A	src/lib/projects/content.ts
+A	src/lib/projects/links.ts
+M	src/themes/cyberpunk/project-page.tsx
+M	src/themes/professional/project-page.tsx
+A	tests/content-entries.test.ts
+29d0662 | 34rns <siamraiyan3@gmail.com> | 2026-10-25T17:33:08+06:00 | Refuse Blob-less uploads and the mock provider in production
+
+M	.env.example
+M	src/app/admin/(panel)/projects/[id]/page.tsx
+M	src/app/admin/(panel)/projects/new/page.tsx
+M	src/app/api/admin/upload/blob/route.ts
+M	src/app/api/admin/upload/route.ts
+M	src/app/api/checkout/route.ts
+M	src/app/api/webhooks/payments/[provider]/route.ts
+M	src/lib/payments/index.ts
+M	src/lib/payments/mock.ts
+M	src/lib/payments/types.ts
+M	src/lib/uploads/storage.ts
+A	tests/payments-production.test.ts
+A	tests/storage-provider.test.ts
+A	tests/upload-storage-route.test.ts
+M	vitest.config.mts
+4cced44 | 34rns <siamraiyan3@gmail.com> | 2026-10-19T20:19:27+06:00 | Preload the model stage poster so it can win LCP
+
+M	src/components/model-stage/model-stage.tsx
+514dd13 | 34rns <siamraiyan3@gmail.com> | 2026-10-19T19:41:01+06:00 | Add the Cyberpunk night-intercept theme for project pages
+
+M	README.md
+A	docs/design/cyberpunk.md
+A	public/demo/ghostline-09.jpg
+A	public/demo/payload-run.jpg
+A	public/demo/signal-intercept.jpg
+M	scripts/seed.ts
+A	src/themes/cyberpunk/boot.tsx
+A	src/themes/cyberpunk/cursor.tsx
+A	src/themes/cyberpunk/preview.tsx
+A	src/themes/cyberpunk/project-page.tsx
+A	src/themes/cyberpunk/scene.tsx
+A	src/themes/cyberpunk/styles.ts
+A	src/themes/cyberpunk/theme.tsx
+A	src/themes/cyberpunk/tokens.ts
+A	src/themes/cyberpunk/trace.ts
+M	src/themes/registry.ts
+A	tests/cyberpunk.test.ts
+M	tests/theme-registry.test.ts
+7062ec7 | 34rns <siamraiyan3@gmail.com> | 2026-10-19T18:31:37+06:00 | Add the Synthwave broadcast theme for project pages
+
+M	.gitignore
+M	README.md
+A	docs/design/synthwave.md
+M	scripts/seed.ts
+M	src/app/(site)/projects/[slug]/page.tsx
+M	src/app/layout.tsx
+M	src/components/project-access.tsx
+M	src/themes/registry.ts
+A	src/themes/synthwave/boot.tsx
+A	src/themes/synthwave/cursor.tsx
+A	src/themes/synthwave/motion.ts
+A	src/themes/synthwave/preview.tsx
+A	src/themes/synthwave/project-page.tsx
+A	src/themes/synthwave/scene.tsx
+A	src/themes/synthwave/styles.ts
+A	src/themes/synthwave/tape.tsx
+A	src/themes/synthwave/theme.tsx
+A	src/themes/synthwave/tokens.ts
+M	src/themes/types.ts
+A	tests/synthwave.test.ts
+M	tests/theme-registry.test.ts
+9108a92 | 34rns <siamraiyan3@gmail.com> | 2026-10-19T14:55:09+06:00 | Add uploads and the Anime 3D project theme
+
+M	.env.example
+M	.gitignore
+M	README.md
+M	docs/deploy-later.md
+A	docs/design/anime.md
+A	docs/phase-3-handoff.md
+A	drizzle/0003_quick_black_cat.sql
+A	drizzle/meta/0003_snapshot.json
+M	drizzle/meta/_journal.json
+M	package-lock.json
+M	package.json
+M	scripts/seed.ts
+M	src/app/admin/(panel)/project-form.tsx
+M	src/app/admin/(panel)/projects/[id]/page.tsx
+M	src/app/admin/(panel)/projects/new/page.tsx
+A	src/app/admin/(panel)/upload-field.tsx
+M	src/app/admin/actions.ts
+A	src/app/api/admin/upload/blob/route.ts
+A	src/app/api/admin/upload/route.ts
+A	src/app/api/uploads/[...path]/route.ts
+M	src/app/globals.css
+M	src/app/layout.tsx
+A	src/components/model-stage/fit.ts
+A	src/components/model-stage/model-stage.tsx
+A	src/components/model-stage/viewer.tsx
+M	src/components/site-intro.tsx
+M	src/components/smart-image.tsx
+M	src/lib/db/schema.ts
+A	src/lib/projects/model.ts
+M	src/lib/projects/validation.ts
+M	src/lib/projects/view.ts
+A	src/lib/uploads/policy.ts
+A	src/lib/uploads/storage.ts
+A	src/themes/anime/preview.tsx
+A	src/themes/anime/project-page.tsx
+A	src/themes/anime/styles.ts
+A	src/themes/anime/theme.tsx
+A	src/themes/anime/tokens.ts
+M	src/themes/registry.ts
+A	tests/model-fit.test.ts
+M	tests/theme-registry.test.ts
+A	tests/uploads.test.ts
+M	tests/validation.test.ts
+20ba69b | 34rns <siamraiyan3@gmail.com> | 2026-10-19T12:06:13+06:00 | Give admins an audited orders view with manual access control
+
+M	docs/deploy-later.md
+M	docs/phase-1-handoff.md
+A	drizzle/0002_swift_shiva.sql
+A	drizzle/meta/0002_snapshot.json
+M	drizzle/meta/_journal.json
+M	src/app/admin/(panel)/layout.tsx
+A	src/app/admin/(panel)/orders/actions.ts
+A	src/app/admin/(panel)/orders/page.tsx
+M	src/app/admin/(panel)/page.tsx
+M	src/lib/db/schema.ts
+A	src/lib/payments/admin.ts
+A	src/lib/payments/db-admin.ts
+M	src/lib/payments/db-store.ts
+A	tests/admin-orders.test.ts
+A	tests/helpers/admin-store.ts
+M	tests/helpers/memory-store.ts
+ad46a99 | 34rns <siamraiyan3@gmail.com> | 2026-10-19T11:41:38+06:00 | Rate-limit the credential callback itself
+
+M	src/app/api/auth/[...nextauth]/route.ts
+M	src/lib/auth/rate-limit.ts
+M	tests/rate-limit.test.ts
+9c8ed4e | 34rns <siamraiyan3@gmail.com> | 2026-10-19T11:31:00+06:00 | Document Phase 2 and the deploy-later checklist
+
+M	.env.example
+M	README.md
+A	docs/deploy-later.md
+M	docs/phase-1-handoff.md
+403e588 | 34rns <siamraiyan3@gmail.com> | 2026-10-19T11:30:58+06:00 | Add provider-agnostic payments and paid project access
+
+M	src/app/(site)/projects/[slug]/page.tsx
+M	src/app/admin/(panel)/page.tsx
+M	src/app/admin/(panel)/project-form.tsx
+M	src/app/admin/(panel)/projects/[id]/page.tsx
+M	src/app/admin/actions.ts
+A	src/app/api/checkout/route.ts
+A	src/app/api/entitlement/route.ts
+A	src/app/api/webhooks/payments/[provider]/route.ts
+A	src/app/checkout/mock/[reference]/mock-checkout.tsx
+A	src/app/checkout/mock/[reference]/page.tsx
+A	src/components/project-access.tsx
+A	src/lib/payments/access.ts
+A	src/lib/payments/checkout.ts
+A	src/lib/payments/db-store.ts
+M	src/lib/payments/index.ts
+A	src/lib/payments/lemonsqueezy.ts
+A	src/lib/payments/mock.ts
+A	src/lib/payments/polar.ts
+A	src/lib/payments/store.ts
+A	src/lib/payments/types.ts
+A	src/lib/payments/webhook.ts
+M	src/lib/projects/validation.ts
+M	src/themes/professional/project-page.tsx
+M	src/themes/types.ts
+A	tests/entitlements.test.ts
+A	tests/helpers/memory-store.ts
+A	tests/mock-checkout.test.ts
+A	tests/payments-lemonsqueezy.test.ts
+A	tests/payments-mock.test.ts
+A	tests/payments-polar.test.ts
+A	tests/webhook-idempotency.test.ts
+6cb8eaa | 34rns <siamraiyan3@gmail.com> | 2026-10-19T11:30:20+06:00 | Add visitor accounts and a role-aware guard
+
+A	drizzle/0001_loving_arachne.sql
+A	drizzle/meta/0001_snapshot.json
+M	drizzle/meta/_journal.json
+A	src/app/(site)/account/actions.ts
+A	src/app/(site)/account/login/login-form.tsx
+A	src/app/(site)/account/login/page.tsx
+A	src/app/(site)/account/purchases/page.tsx
+A	src/app/(site)/account/signup/page.tsx
+A	src/app/(site)/account/signup/signup-form.tsx
+M	src/lib/auth/config.ts
+M	src/lib/auth/guard.ts
+M	src/lib/auth/index.ts
+M	src/lib/auth/password.ts
+A	src/lib/auth/rate-limit.ts
+M	src/lib/auth/require-admin.ts
+A	src/lib/auth/signup.ts
+M	src/lib/db/queries.ts
+M	src/lib/db/schema.ts
+M	src/proxy.ts
+M	src/types/next-auth.d.ts
+M	tests/auth-guard.test.ts
+A	tests/rate-limit.test.ts
+A	tests/signup.test.ts
+f4d3d09 | 34rns <siamraiyan3@gmail.com> | 2026-10-19T10:43:42+06:00 | Hide the duplicate wordmark in the mobile header
+
+M	README.md
+M	docs/phase-1-handoff.md
+M	src/themes/professional/landing.tsx
+60523fe | 34rns <siamraiyan3@gmail.com> | 2026-10-19T10:33:37+06:00 | Record the measured Phase 1 verification results
+
+M	docs/phase-1-handoff.md
+463dec9 | 34rns <siamraiyan3@gmail.com> | 2026-10-19T10:30:06+06:00 | Render the hero entrance in CSS to protect LCP
+
+M	src/app/globals.css
+M	src/themes/professional/components/hero.tsx
+1eadf1d | 34rns <siamraiyan3@gmail.com> | 2026-10-19T10:25:51+06:00 | Fix the cursor effect lint error and drop an unused reveal component
+
+M	src/components/cursor.tsx
+D	src/components/reveal.tsx
+ec2a693 | 34rns <siamraiyan3@gmail.com> | 2026-10-19T10:22:53+06:00 | Point the README at the deployed production URL
+
+M	README.md
+03dc73c | 34rns <siamraiyan3@gmail.com> | 2026-10-19T10:19:50+06:00 | Speed up first paint on the landing page
+
+M	src/app/globals.css
+A	src/app/icon.svg
+M	src/themes/professional/components/hero.tsx
+9738854 | shadowthon <rns.official.dev@gmail.com> | 2026-10-19T09:49:36+06:00 | Build the Phase 1 portfolio platform with themed project pages
+
+A	.env.example
+A	.gitignore
+A	AGENTS.md
+A	README.md
+A	docs/design/professional.md
+A	docs/phase-1-handoff.md
+A	drizzle.config.ts
+A	drizzle/0000_freezing_jack_murdock.sql
+A	drizzle/meta/0000_snapshot.json
+A	drizzle/meta/_journal.json
+A	eslint.config.mjs
+A	next.config.ts
+A	package-lock.json
+A	package.json
+A	scripts/hash-password.mjs
+A	scripts/migrate.ts
+A	scripts/seed.ts
+A	src/app/(site)/layout.tsx
+A	src/app/(site)/page.tsx
+A	src/app/(site)/projects/[slug]/opengraph-image.tsx
+A	src/app/(site)/projects/[slug]/page.tsx
+A	src/app/admin/(panel)/layout.tsx
+A	src/app/admin/(panel)/page.tsx
+A	src/app/admin/(panel)/project-form.tsx
+A	src/app/admin/(panel)/projects/[id]/page.tsx
+A	src/app/admin/(panel)/projects/new/page.tsx
+A	src/app/admin/(panel)/projects/page.tsx
+A	src/app/admin/actions.ts
+A	src/app/admin/confirm-button.tsx
+A	src/app/admin/layout.tsx
+A	src/app/admin/login/login-form.tsx
+A	src/app/admin/login/page.tsx
+A	src/app/admin/preview/[id]/page.tsx
+A	src/app/api/auth/[...nextauth]/route.ts
+A	src/app/globals.css
+A	src/app/layout.tsx
+A	src/app/not-found.tsx
+A	src/app/opengraph-image.tsx
+A	src/app/robots.ts
+A	src/app/sitemap.ts
+A	src/components/cursor.tsx
+A	src/components/reveal.tsx
+A	src/components/site-intro.tsx
+A	src/components/smart-image.tsx
+A	src/content/site.ts
+A	src/lib/auth/config.ts
+A	src/lib/auth/guard.ts
+A	src/lib/auth/index.ts
+A	src/lib/auth/password.ts
+A	src/lib/auth/require-admin.ts
+A	src/lib/db/client.ts
+A	src/lib/db/queries.ts
+A	src/lib/db/schema.ts
+A	src/lib/payments/index.ts
+A	src/lib/projects/order.ts
+A	src/lib/projects/revalidate.ts
+A	src/lib/projects/slug.ts
+A	src/lib/projects/validation.ts
+A	src/lib/projects/view.ts
+A	src/lib/seo.ts
+A	src/proxy.ts
+A	src/themes/professional/components/hero.tsx
+A	src/themes/professional/components/magnetic-link.tsx
+A	src/themes/professional/components/parallax-cover.tsx
+A	src/themes/professional/components/work-index.tsx
+A	src/themes/professional/cover.tsx
+A	src/themes/professional/landing.tsx
+A	src/themes/professional/preview.tsx
+A	src/themes/professional/project-page.tsx
+A	src/themes/professional/theme.tsx
+A	src/themes/professional/tokens.ts
+A	src/themes/registry.ts
+A	src/themes/style.ts
+A	src/themes/types.ts
+A	src/types/next-auth.d.ts
+A	tests/auth-guard.test.ts
+A	tests/order.test.ts
+A	tests/revalidation.test.ts
+A	tests/slug.test.ts
+A	tests/theme-registry.test.ts
+A	tests/validation.test.ts
+A	tsconfig.json
+A	vitest.config.mts
