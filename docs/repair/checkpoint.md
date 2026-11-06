@@ -1,6 +1,6 @@
 # Portfolio repair checkpoint — 6 November 2026
 
-Project: D:/FreeCodeChats/portfolio. Do not push or deploy until the user says go live.
+Project: D:/FreeCodeChats/portfolio. The user authorized production publication and explicitly requested pushing main. Use a normal GitHub push to the connected Vercel project; never force-push.
 
 ## Completed and verified
 
@@ -14,22 +14,17 @@ Project: D:/FreeCodeChats/portfolio. Do not push or deploy until the user says g
 - Screenshots and logs are under screenshots/repair (already gitignored). index.html is a review gallery. url-statuses.md lists all 172 checks including repeated environments and restored-image byte comparisons.
 - Two original external source links are still HTTP 404: github.com/34rns/moneykickshop and github.com/34rns/OfficeChaos. They may be private or renamed; no replacements were invented.
 
-## Latest user decision and outstanding blocker
+## Final hero restoration and publication — 6 November 2026
 
-The user ultimately clarified: keep the **big RNS at every width**, remove the **small landing navbar RNS**, retain each project theme design, and tidy the landing lightly. This supersedes the intermediate desktop role-title choice and the original hidden-md wordmark prescription. FolderDock stays, using free-release wording.
+- Restored only src/themes/professional/components/hero.tsx from HEAD after confirming the sole diff was the temporary desktop role-title substitution. Its blob hash matches HEAD: 16cc0b49e417e55c31654a0e37ceb115c5731cf3. The original big RNS is retained at every width; the committed navigation-only landing header, right alignment and 44px link targets remain intact. Other themes are unchanged.
+- Fresh lint, typecheck, all 252 tests in 30 files with two workers, and the production build passed in this session. The typecheck, test and build logs are screenshots/repair/typecheck-final.log, tests-final.log and build-final.log.
+- Replaced only the identified old portfolio preview process (PID 14348) with the rebuilt production preview at http://localhost:3100 (PID 26360). Recheck identity before stopping it.
+- Added .vercelignore with explicit user approval, copying existing .gitignore rules. GitHub's committed inventory contains all 22 Shobdo PNGs and all six Keycap source files, and excludes local credentials, backups, screenshots and uploads. The backup branch and repair backup folder are preserved.
+- Earlier automatic approval-review failures prevented fresh browser checks and checkpoint updates. Execution is now working again. After being told those checks were still incomplete, the user explicitly instructed push and retry push. The final local URL/browser checks are being refreshed in parallel; existing intermediate captures must not be treated as fresh proof.
+- The user confirmed GitHub is connected to Vercel. Push main normally and verify the resulting production deployment; do not create a duplicate CLI deployment unless the Git integration does not deploy. Project: rns-portfolio, prj_vZTNBXI5Qm6eF8KSF90mBQoCpTIp. Production: https://rns-portfolio-teal.vercel.app.
+- Local and production use the same database. No database writes were made. The two original external GitHub 404s (MoneyKick Shop and OfficeChaos) remain known limitations.
 
-The landing navbar has now been changed to navigation-only, kept right-aligned with ml-auto, with 44px link targets. Other project headers are untouched.
-
-**The working-copy hero still contains my temporary intermediate desktop role-title substitution.** Restoring the original hero was blocked by automatic execution review. An initial combined command failed because approval review disconnected with content_filter. Subsequent single-file restore requests were rejected as repeats of that blocked operation, despite the reviewer expressly acknowledging low risk and authorization. The user then explicitly approved restoring the original hero; review still rejected it because the content-filter restriction remained. Do not bypass that execution restriction through another tool or an indirect operation.
-
-The committed hero and the ignored original-file backup still contain the correct original large RNS. The temporary hero edit is deliberately uncommitted. The latest request cannot be declared complete while this edit remains. The existing local server and screenshots show the previously verified intermediate landing, not the final requested desktop identity.
-
-## Resume only when the execution restriction is cleared
-
-- Restore the original big-RNS hero while preserving the navbar-only landing change. Do not change project themes.
-- Run lint, typecheck, all tests, and rebuild. Stop/restart only this task's server (PID stored in screenshots/repair/server.pid; verify its command line first).
-- Run the read-only audit and browser checks; the browser script now expects one big RNS and no landing navbar mark at every width. Refresh the gallery and screenshots for the final landing.
-- Commit remaining approved fixes locally, report any remaining limitations, then wait for go live. No push/deployment has occurred.
+Publication evidence is saved locally under screenshots/repair/deployment-final.json when available. Fresh local checks use audit-local.json and browser-final.json; production checks use audit-live.json and browser-live.json. The review gallery is screenshots/repair/index.html. Read those timestamped reports to confirm completion and the deployment ID; this checkpoint does not itself assert a successful deployment.
 
 ## Reusable checks
 
