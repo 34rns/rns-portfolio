@@ -317,6 +317,7 @@ body {
 }
 
 .editorial code {
+  overflow-wrap: anywhere;
   font-family: var(--font-dm-mono), ui-monospace, monospace;
   font-size: 0.85em;
   background: var(--theme-surface);

@@ -33,7 +33,7 @@ export function ProfessionalProjectPage({ project, next, access }: ProjectPagePr
         </Link>
       </header>
 
-      <article className="mx-auto mt-14 max-w-[1440px] px-5 md:px-10">
+      <article id="main" tabIndex={-1} className="mx-auto mt-14 max-w-[1440px] px-5 md:px-10">
         <div className="grid gap-8 md:grid-cols-12 md:gap-10">
           <div className="md:col-span-8">
             <p className="mono text-[var(--theme-muted)]">
