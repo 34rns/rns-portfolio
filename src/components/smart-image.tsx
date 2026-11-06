@@ -18,7 +18,8 @@ export function SmartImage({ src, alt, className, sizes, priority, fill }: Smart
           alt={alt}
           fill
           sizes={sizes}
-          priority={priority}
+          loading={priority ? "eager" : undefined}
+          fetchPriority={priority ? "high" : undefined}
           className={className}
         />
       );
@@ -30,7 +31,8 @@ export function SmartImage({ src, alt, className, sizes, priority, fill }: Smart
         width={1600}
         height={1000}
         sizes={sizes}
-        priority={priority}
+        loading={priority ? "eager" : undefined}
+        fetchPriority={priority ? "high" : undefined}
         className={className}
       />
     );

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  FOLDERDOCK_DOWNLOAD,
   planContentInsertions,
   projectEntries,
   QUICKKIT_DOWNLOAD,
+  selectContentEntries,
 } from "@/lib/projects/content";
 import { isReleaseDownloadLink, repoSlug } from "@/lib/projects/links";
 
@@ -11,37 +13,70 @@ type Row = { id: string; slug: string; title: string };
 const row = (slug: string): Row => ({ id: `id-${slug}`, slug, title: slug });
 
 describe("planContentInsertions", () => {
-  it("inserts both entries when neither slug exists", () => {
+  it("inserts every entry when no slug exists", () => {
     const plan = planContentInsertions([row("moneykick-shop")]);
 
-    expect(plan.toInsert.map((entry) => entry.slug)).toEqual(["loupe", "quickkit"]);
+    expect(plan.toInsert.map((entry) => entry.slug)).toEqual([
+      "loupe",
+      "quickkit",
+      "shobdo-keyboard",
+      "folderdock",
+    ]);
     expect(plan.skipped).toEqual([]);
   });
 
   it("skips any slug that already exists and never rewrites it", () => {
     const plan = planContentInsertions([row("loupe"), row("office-chaos")]);
 
-    expect(plan.toInsert.map((entry) => entry.slug)).toEqual(["quickkit"]);
+    expect(plan.toInsert.map((entry) => entry.slug)).toEqual([
+      "quickkit",
+      "shobdo-keyboard",
+      "folderdock",
+    ]);
     expect(plan.skipped.map((entry) => entry.slug)).toEqual(["loupe"]);
   });
 
   it("has no update or delete path at all", () => {
-    const plan = planContentInsertions([row("loupe"), row("quickkit")]);
+    const plan = planContentInsertions([
+      row("loupe"),
+      row("quickkit"),
+      row("shobdo-keyboard"),
+      row("folderdock"),
+    ]);
 
     expect(plan.toInsert).toEqual([]);
-    expect(plan.skipped).toHaveLength(2);
+    expect(plan.skipped).toHaveLength(4);
     // The plan only ever carries two kinds of decision.
     expect(Object.keys(plan).sort()).toEqual(["skipped", "toInsert"]);
   });
 
   it("is a no-op when re-run after a successful insert", () => {
     const first = planContentInsertions([]);
-    const afterFirstRun = [row("loupe"), row("quickkit")];
+    const afterFirstRun = [
+      row("loupe"),
+      row("quickkit"),
+      row("shobdo-keyboard"),
+      row("folderdock"),
+    ];
     const second = planContentInsertions(afterFirstRun);
 
-    expect(first.toInsert).toHaveLength(2);
+    expect(first.toInsert).toHaveLength(4);
     expect(second.toInsert).toHaveLength(0);
-    expect(second.skipped).toHaveLength(2);
+    expect(second.skipped).toHaveLength(4);
+  });
+});
+
+describe("selectContentEntries", () => {
+  it("selects one requested project for a surgical production insert", () => {
+    expect(selectContentEntries("folderdock").map((entry) => entry.slug)).toEqual([
+      "folderdock",
+    ]);
+  });
+
+  it("rejects an unknown requested project", () => {
+    expect(() => selectContentEntries("missing-project")).toThrow(
+      'Unknown project slug "missing-project".',
+    );
   });
 });
 
@@ -49,7 +84,12 @@ describe("project entries", () => {
   it("uses unique slugs that do not collide with the seeded ones", () => {
     const slugs = projectEntries.map((entry) => entry.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
-    expect(slugs).toEqual(["loupe", "quickkit"]);
+    expect(slugs).toEqual([
+      "loupe",
+      "quickkit",
+      "shobdo-keyboard",
+      "folderdock",
+    ]);
   });
 
   it("publishes each project as free, with a repo and a cover", () => {
@@ -74,6 +114,9 @@ describe("project entries", () => {
     expect(QUICKKIT_DOWNLOAD).toBe(
       "https://github.com/34rns/QuickKit/releases/latest/download/quickkit.zip",
     );
+    expect(FOLDERDOCK_DOWNLOAD).toBe(
+      "https://github.com/34rns/FolderDock/releases/download/v1.0.2/FolderDock-1.0.2-preview.zip",
+    );
   });
 });
 
@@ -85,12 +128,15 @@ describe("release download links", () => {
     ).toBe(true);
   });
 
-  it("does not treat a site or a version-pinned asset as the stable link", () => {
+  it("recognises a version-pinned GitHub release asset", () => {
+    expect(
+      isReleaseDownloadLink("https://github.com/a/b/releases/download/v1/x.zip"),
+    ).toBe(true);
+  });
+
+  it("does not treat a site or repository as a download", () => {
     expect(isReleaseDownloadLink("https://moneykickshop1.vercel.app")).toBe(false);
     expect(isReleaseDownloadLink("https://github.com/34rns/loupe")).toBe(false);
-    expect(isReleaseDownloadLink("https://github.com/a/b/releases/download/v1/x.zip")).toBe(
-      false,
-    );
     expect(isReleaseDownloadLink(null)).toBe(false);
     expect(isReleaseDownloadLink(undefined)).toBe(false);
   });

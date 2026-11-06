@@ -43,4 +43,20 @@ describe("theme registry", () => {
     expect(themes.cyberpunk.Landing).toBeUndefined();
     expect(getTheme("cyberpunk").slug).toBe("cyberpunk");
   });
+
+  it("registers the Keycap theme for project pages", () => {
+    expect(themes.keycap.slug).toBe("keycap");
+    expect(themes.keycap.ProjectPage).toBeTypeOf("function");
+    expect(themes.keycap.Preview).toBeTypeOf("function");
+    expect(themes.keycap.Landing).toBeUndefined();
+    expect(getTheme("keycap").slug).toBe("keycap");
+  });
+
+  it("registers the FolderDock theme for project pages", () => {
+    expect(themes.folderdock.slug).toBe("folderdock");
+    expect(themes.folderdock.ProjectPage).toBeTypeOf("function");
+    expect(themes.folderdock.Preview).toBeTypeOf("function");
+    expect(themes.folderdock.Landing).toBeUndefined();
+    expect(getTheme("folderdock").slug).toBe("folderdock");
+  });
 });

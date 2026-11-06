@@ -6,6 +6,7 @@ import {
   IBM_Plex_Mono,
   Newsreader,
   Press_Start_2P,
+  Tiro_Bangla,
   VT323,
 } from "next/font/google";
 import { site } from "@/content/site";
@@ -57,6 +58,14 @@ const plexMono = IBM_Plex_Mono({
   preload: false,
 });
 
+/** Keycap sets its Bangla display lines in Tiro Bangla. */
+const tiroBangla = Tiro_Bangla({
+  subsets: ["bengali", "latin"],
+  weight: "400",
+  display: "swap",
+  preload: false,
+});
+
 /**
  * Set the font custom properties inline instead of through next/font's
  * generated `variable` classes. Those classes carry a per-compilation hash;
@@ -70,6 +79,7 @@ const fontVars = {
   "--font-vt323": vt323.style.fontFamily,
   "--font-press-start": pressStart.style.fontFamily,
   "--font-plex-mono": plexMono.style.fontFamily,
+  "--font-tiro-bangla": tiroBangla.style.fontFamily,
 } as CSSProperties;
 
 export const metadata: Metadata = {

@@ -1,8 +1,9 @@
 /**
- * A project whose `liveUrl` points at a GitHub "latest" release asset is a
- * free download, not a hosted site — the themes label the link accordingly.
+ * A project whose `liveUrl` points at a GitHub release asset is a free
+ * download, not a hosted site — the themes label the link accordingly.
  */
-const RELEASE_DOWNLOAD = /github\.com\/[^/]+\/[^/]+\/releases\/latest\/download\//i;
+const RELEASE_DOWNLOAD =
+  /github\.com\/[^/]+\/[^/]+\/releases\/(?:latest\/download|download\/[^/]+)\//i;
 
 export function isReleaseDownloadLink(url: string | null | undefined): boolean {
   return Boolean(url && RELEASE_DOWNLOAD.test(url));

@@ -55,6 +55,7 @@ src/themes                registry + one folder per theme
   anime/                  manga project page, cel-shaded stage, scoped CSS
   synthwave/              neon CRT project page, grid scene, boot sequence
   cyberpunk/              field-ops dossier, optic feed, trace scene, handshake
+  keycap/                 letterpress specimen sheet, Bangla type, theme strip
 scripts/                  migrate, seed, password hash
 tests/                    auth guard, revalidation, validation, registry, themes, uploads
 ```
@@ -232,3 +233,6 @@ deploys production from `vercel --prod` or from a merged pull request.
 - Phase 5 — Cyberpunk theme. **Done locally, not deployed.** See
   [cyberpunk.md](docs/design/cyberpunk.md).
 - Phase 6 — performance, accessibility, SEO and QA pass.
+- Keycap theme + Shobdo Keyboard case study. **Done and deployed.** See
+  [keycap.md](docs/design/keycap.md) and
+  <https://rns-portfolio-teal.vercel.app/projects/shobdo-keyboard>.

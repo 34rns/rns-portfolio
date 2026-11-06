@@ -1,5 +1,5 @@
 /**
- * The two projects added by `scripts/add-projects.ts`.
+ * The projects added by `scripts/add-projects.ts`.
  *
  * Kept in `src/` so the planning rule is unit-testable without a database.
  * The script owns all I/O; this module is pure.
@@ -12,7 +12,13 @@ export type ContentEntry = {
   title: string;
   tagline: string;
   year: number;
-  theme: "professional" | "anime" | "synthwave" | "cyberpunk";
+  theme:
+    | "professional"
+    | "anime"
+    | "synthwave"
+    | "cyberpunk"
+    | "keycap"
+    | "folderdock";
   tags: string[];
   liveUrl: string;
   repoUrl: string;
@@ -27,6 +33,8 @@ export const LOUPE_DOWNLOAD =
   "https://github.com/34rns/loupe/releases/latest/download/loupe.zip";
 export const QUICKKIT_DOWNLOAD =
   "https://github.com/34rns/QuickKit/releases/latest/download/quickkit.zip";
+export const FOLDERDOCK_DOWNLOAD =
+  "https://github.com/34rns/FolderDock/releases/download/v1.0.2/FolderDock-1.0.2-preview.zip";
 
 export const projectEntries: ContentEntry[] = [
   {
@@ -173,7 +181,130 @@ Static checks and a host-logic test suite run with \`node tests/...\` and have n
       ],
     },
   },
+  {
+    slug: "shobdo-keyboard",
+    title: "Shobdo Keyboard",
+    tagline:
+      "Bangla, Banglish and English on Android — offline, private and designed key by key.",
+    year: 2026,
+    theme: "keycap",
+    tags: ["Android", "Kotlin", "Jetpack Compose", "IME", "Bengali", "Open source"],
+    liveUrl:
+      "https://github.com/34rns/shobdo-keyboard/releases/latest/download/Shobdo-Keyboard-v0.3.0.apk",
+    repoUrl: "https://github.com/34rns/shobdo-keyboard",
+    themeOptions: {},
+    sortOrder: 1,
+    description: `## Why another keyboard
+
+Most Android keyboards treat Bangla as an afterthought: a transliteration mode bolted onto a QWERTY grid, or a desktop-era layout with no composing rules behind it. The good ones tend to be online, and the ones that are offline tend to look like utilities. Shobdo started from the opposite end — a keyboard built around the way Bangla is actually typed, then designed like a product rather than a settings screen.
+
+It is a real Android input method, not a web wrapper and not a demo. Kotlin and Jetpack Compose, a canvas keyboard core, six layout pages and a settings app that ships in the same APK. API 26 and up, target 35, MIT licensed.
+
+## How the three modes work
+
+**Bangla** is a fixed Probhat-style layout for people who already know the letters. The positions follow the published chart, so muscle memory transfers. Kar signs attach to the base letter, hasanta joins conjuncts, and one press of backspace removes a base letter together with its kar instead of leaving a stray mark behind.
+
+**Banglish** is the phonetic path for people who think in Roman letters. You type \`ami\` and the suggestion bar offers আমি; press space to accept, or tap the Roman chip to keep the English. The scheme follows the widely used Avro conventions — \`kh\` is খ, \`sh\` is শ, \`Sh\` is ষ, \`Ng\` is ঙ, \`T\` and \`Th\` are ট and ঠ, and \`pr\` becomes the conjunct প্র.
+
+**English** is a full QWERTY deck one tap away, with a number row, long-press accents (hold a vowel for é è ê ë), two symbol pages and a shift key that shows whether it is in single-capital or caps-lock state. The globe key cycles only the languages you enabled; at least one always stays on.
+
+## Ranking, not guessing
+
+v0.3.0 ships a Bangla frequency list of 83,433 words inside the APK. Every possible reading of the Roman buffer is scored against it and the common word comes first, which is the difference between a transliteration gimmick and something you can type a message with. The suggestion strip expands into a full candidate panel, and the keyboard can remember the words you pick so the next sentence is faster.
+
+Nothing about that ranking leaves the device. The list is a bundled asset, read locally.
+
+## A theme collection, not a palette
+
+The theme collection was rebuilt for 0.3.0 rather than recoloured: Studio Light, Studio Dark, Onyx, Frost, Aurora, Sakura, Tokyo Night, Pixel Arcade, Cassette, Obsidian Gold, Cloudline, Evergreen and Dynamic, which follows Material You on Android 12 and newer. The picker shows a live keyboard preview of each one, so you are choosing a keyboard rather than a swatch.
+
+Every pair is checked against a 4.5:1 contrast floor on the composited key colour — not just the theme's nominal background. Themes are plain JSON with key depth, key shape, a font role, a secondary accent and a pressed-key scale; schema 1 files still load, and you can duplicate, create, export and import your own.
+
+## The small things
+
+- Hold backspace to delete continuously after a short delay.
+- Two symbol pages, plus a Bangla digits page with ৳ and Bengali punctuation.
+- A settings app translated into Bangla, with every control carrying a content description and at least a 48dp touch target.
+- Key height, spacing, corner radius, font size, bold, borders, number row, haptic strength and one-handed mode are all adjustable.
+- Dark and light follow the system.
+
+## Private by construction
+
+Shobdo has no \`INTERNET\` permission. That is not a promise in a policy document; the operating system will not let the app open a connection. There is no analytics SDK, no ad library, no crash reporter and no remote font. The only permission in the release manifest is \`VIBRATE\`.
+
+## Under the hood
+
+The release is R8-shrunk, resource-shrunk and signed, and lands at 1.9 MB. Eighty unit tests cover the Banglish rules, the layout data, the theme schema and contrast, and the composing logic; lint reports zero errors. Four Python validators check layouts, themes, strings and the phonetic fixture without needing an Android build, and a PowerShell guard runs the same checks from both git hooks.
+
+Screenshots are real captures: the debug build running on Android 15, taken with \`adb exec-out screencap\` while Shobdo was the active input method, in a debug-only demo chat that never ships in a release APK.
+
+## Install
+
+Download the APK from the latest release, open it on the phone, allow installing from that source, then follow the three setup steps — enable the keyboard, choose it, pick your languages and theme. Requires Android 8.0 (API 26) or newer.
+
+## Still on the bench
+
+Automatic reph is not implemented yet, so \`kormo\` produces করমো rather than কর্ম. The Probhat uppercase alternates still want a native speaker's review, and a Jatiya layout plus a phonetic Bangla layout are the next decks on the list.`,
+    defaultImages: {
+      cover: "/projects/shobdo/cover.png",
+      gallery: [
+        "/projects/shobdo/00-onboarding.png",
+        "/projects/shobdo/01-english.png",
+        "/projects/shobdo/02-bangla.png",
+        "/projects/shobdo/03-banglish.png",
+        "/projects/shobdo/04-candidates.png",
+        "/projects/shobdo/05-themes.png",
+        "/projects/shobdo/composite-themes.png",
+        "/projects/shobdo/composite-settings.png",
+      ],
+    },
+  },
+  {
+    slug: "folderdock",
+    title: "FolderDock",
+    tagline: "Your asset folders, inside Premiere Pro and After Effects.",
+    year: 2026,
+    theme: "folderdock",
+    tags: ["Adobe CEP", "JavaScript", "ExtendScript", "Local-first", "Open source"],
+    liveUrl: FOLDERDOCK_DOWNLOAD,
+    repoUrl: "https://github.com/34rns/FolderDock",
+    themeOptions: { accent: "#FF8A3D" },
+    sortOrder: 1,
+    description: `## Keep the library beside the timeline
+
+FolderDock is a free, open-source CEP panel for editors and motion designers whose assets live across ordinary folders. Instead of leaving Premiere Pro or After Effects to search in Explorer, it keeps those folders available inside the editing workspace so you can browse, inspect and place media with less context switching.
+
+## A folder-first workflow
+
+Add a parent folder, move through its tree, then search by filename or tag. Type filters, sorting, favorites and recent imports help narrow a large library without changing the files on disk. Images and videos can be previewed before placement, while audio stays silent until you deliberately press play and provides a full-file waveform when supported.
+
+Placement remains host-aware: media goes to an active Premiere sequence or After Effects composition, with manual fallbacks where Adobe's CEP APIs do not expose a safe automatic path. Optional local FFmpeg support can create extra previews and waveforms, but FolderDock never downloads it and never sends media to a service.
+
+## Free release
+
+Version 1.0.2 is a free, unsigned CEP release. It passed local regression, browser interaction and large-library component checks. The manifest's host range is registration data rather than a tested compatibility matrix, so compatibility should be checked in your Adobe setup before production work. CEP support is required, Premiere preset imports and some track setup remain manual, and native panel-to-timeline file dragging is not available.
+
+FolderDock is built with plain JavaScript, CSS and ExtendScript. It stores library preferences locally, keeps generated previews in its local cache, makes no network requests and is independent from Adobe.`,
+    defaultImages: {
+      cover: "/projects/folderdock/library.webp",
+      gallery: [
+        "/projects/folderdock/library.webp",
+        "/projects/folderdock/audio.webp",
+      ],
+    },
+  },
 ];
+
+/** Limit a one-directional content insert to one known slug when requested. */
+export function selectContentEntries(
+  slug: string | null | undefined,
+  entries: readonly ContentEntry[] = projectEntries,
+): readonly ContentEntry[] {
+  if (!slug) return entries;
+  const selected = entries.filter((entry) => entry.slug === slug);
+  if (selected.length === 0) throw new Error(`Unknown project slug "${slug}".`);
+  return selected;
+}
 
 /**
  * Decide what the script may write. Anything whose slug already exists is

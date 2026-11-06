@@ -79,7 +79,12 @@ export function WorkIndex({ projects }: { projects: ProjectView[] }) {
                 </span>
               </div>
               <div className="mt-4 md:hidden">
-                <Cover project={project} ratio="16 / 10" sizes="100vw" />
+                <Cover
+                  project={project}
+                  ratio="16 / 10"
+                  priority={index === 0}
+                  sizes="(max-width: 767px) calc(100vw - 40px), 1px"
+                />
               </div>
             </Link>
           </li>

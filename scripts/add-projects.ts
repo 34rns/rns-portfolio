@@ -4,7 +4,7 @@ import { loadEnvConfig } from "@next/env";
 loadEnvConfig(process.cwd());
 
 /**
- * Insert the two new projects, but only where their slug does not exist yet.
+ * Insert new projects, but only where their slug does not exist yet.
  *
  * This script is deliberately one-directional: it SELECTs, then INSERTs, and
  * never UPDATEs or DELETEs. Re-running it is always safe, and it can never
@@ -12,6 +12,7 @@ loadEnvConfig(process.cwd());
  *
  *   npx tsx scripts/add-projects.ts                       # local, images from /projects
  *   npx tsx scripts/add-projects.ts --dry-run             # report only, write nothing
+ *   npx tsx scripts/add-projects.ts --slug folderdock     # insert one known project
  *   npx tsx scripts/add-projects.ts --target production --images-file urls.json
  *
  * `--target production` reads PROD_DATABASE_URL instead of .env.local, so a
@@ -49,7 +50,7 @@ async function main() {
   const { neon } = await import("@neondatabase/serverless");
   const { drizzle } = await import("drizzle-orm/neon-http");
   const { projects } = await import("@/lib/db/schema");
-  const { projectEntries, planContentInsertions } = await import(
+  const { projectEntries, planContentInsertions, selectContentEntries } = await import(
     "@/lib/projects/content"
   );
 
@@ -65,7 +66,9 @@ async function main() {
     .select({ id: projects.id, slug: projects.slug, title: projects.title })
     .from(projects);
 
-  const { toInsert, skipped } = planContentInsertions(existing, projectEntries);
+  const requestedSlug = arg("slug");
+  const entries = selectContentEntries(requestedSlug, projectEntries);
+  const { toInsert, skipped } = planContentInsertions(existing, entries);
 
   for (const row of skipped) {
     console.log(`  skip      ${row.slug} — already exists (never updated)`);
