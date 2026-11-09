@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ReleaseVersion } from "@/components/release-version";
 import { SmartImage } from "@/components/smart-image";
-import { isReleaseDownloadLink } from "@/lib/projects/links";
+import { isLatestReleaseLink, isReleaseDownloadLink } from "@/lib/projects/links";
 import type { ProjectPageProps } from "../types";
 import {
   banglishRows,
@@ -92,6 +92,7 @@ export function KeycapProjectPage({ project, next, related = [], access }: Proje
   const readMinutes = Math.max(1, Math.round(words / 200));
   const tags = project.tags.slice(0, 6);
   const download = isReleaseDownloadLink(project.liveUrl);
+  const latestRelease = isLatestReleaseLink(project.liveUrl);
   const cover = project.coverImageUrl ?? languagePlates[0].src;
 
   const gallerySources = (
@@ -152,8 +153,8 @@ export function KeycapProjectPage({ project, next, related = [], access }: Proje
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {download ? "Download APK" : "Open project"}
-                    {download ? (
+                    {download ? "Download APK" : latestRelease ? "Latest release" : "Open project"}
+                    {download || latestRelease ? (
                       <ReleaseVersion
                         repoUrl={project.repoUrl}
                         className="kc-button-version"
@@ -180,12 +181,12 @@ export function KeycapProjectPage({ project, next, related = [], access }: Proje
                   <dd>Android 8.0+</dd>
                 </div>
                 <div className="kc-fact">
-                  <dt>Release</dt>
-                  <dd>1.9 MB APK</dd>
+                  <dt>v0.4.0</dt>
+                  <dd>3.99 MB APK</dd>
                 </div>
                 <div className="kc-fact">
                   <dt>Licence</dt>
-                  <dd>MIT</dd>
+                  <dd>MIT source · CC BY-SA data</dd>
                 </div>
                 <div className="kc-fact">
                   <dt>Built with</dt>
@@ -367,8 +368,8 @@ export function KeycapProjectPage({ project, next, related = [], access }: Proje
                 <h2 className="kc-section-title">Type Roman. Read Bangla.</h2>
               </div>
               <p className="kc-section-note">
-                Longest match first, AVRO-style. The suggestion bar ranks every
-                reading against an 83,000-word frequency list.
+                AVRO-style rules with offline reverse lookup, prefix completion
+                and spelling-error fallback. Add your own words in settings.
               </p>
             </div>
 
@@ -443,8 +444,8 @@ export function KeycapProjectPage({ project, next, related = [], access }: Proje
                 <h2 className="kc-section-title">Small, tested, offline.</h2>
               </div>
               <p className="kc-section-note">
-                The release is R8-shrunk, resource-shrunk and signed. The manifest
-                asks for vibration and nothing else.
+                v0.4.0 is R8-shrunk, resource-shrunk and signed. Its permissions
+                cover vibration and an app-specific AndroidX receiver.
               </p>
             </div>
 
@@ -459,16 +460,18 @@ export function KeycapProjectPage({ project, next, related = [], access }: Proje
 
             <pre className="kc-proof-code">
               <code>
-                {`$ aapt dump permissions Shobdo-Keyboard-v0.3.0.apk
+                {`$ aapt dump permissions Shobdo-Keyboard-v0.4.0.apk
 package: app.shobdo.keyboard
 uses-permission: name='android.permission.VIBRATE'
+permission: app.shobdo.keyboard.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+uses-permission: name='app.shobdo.keyboard.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
 `}
                 <span className="kc-ok">✓ no INTERNET permission</span>
               </code>
             </pre>
 
             <div className="kc-proof-foot">
-              <span>80 unit tests / 0 failures</span>
+              <span>v0.4.0 / 98 unit tests / 0 failures</span>
               <span>Lint: 0 errors</span>
               <span>minSdk 26 · targetSdk 35</span>
               <span>MIT © 34rns</span>

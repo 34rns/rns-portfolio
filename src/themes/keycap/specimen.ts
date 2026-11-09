@@ -24,7 +24,7 @@ export const languagePlates: LanguagePlate[] = [
     name: "Banglish",
     src: "/projects/shobdo/03-banglish.png",
     caption: "Type Roman, get Bangla",
-    note: "ami becomes আমি. Every reading of the Roman buffer is scored against an 83,000-word frequency list, so the common word is the first key.",
+    note: "ami becomes আমি, and valo becomes ভালো. Offline reverse lookup, prefix completions, context and remembered choices rank the suggestions as you type.",
   },
   {
     key: "EN",
@@ -59,6 +59,9 @@ export const banglishRows: BanglishRow[] = [
   { roman: "ami", bangla: "আমি", meaning: "I" },
   { roman: "tumi", bangla: "তুমি", meaning: "you" },
   { roman: "bhalo", bangla: "ভালো", meaning: "good" },
+  { roman: "valo", bangla: "ভালো", meaning: "good, alternate spelling" },
+  { roman: "kemon", bangla: "কেমন", meaning: "how" },
+  { roman: "kormo", bangla: "কর্ম", meaning: "work, reph" },
   { roman: "bangla", bangla: "বাংলা", meaning: "Bangla" },
   { roman: "kotha", bangla: "কথা", meaning: "word, talk" },
   { roman: "desh", bangla: "দেশ", meaning: "country" },
@@ -105,8 +108,8 @@ export const galleryShots: GalleryShot[] = [
 
 export const proofPoints = [
   { value: "13", label: "built-in themes" },
-  { value: "80", label: "unit tests, 0 failures" },
-  { value: "1.9", label: "MB release APK" },
+  { value: "98", label: "unit tests, 0 failures" },
+  { value: "3.99", label: "MB APK, v0.4.0" },
   { value: "0", label: "network permissions" },
 ];
 
@@ -114,8 +117,8 @@ export const tickerItems = [
   "Three languages",
   "Thirteen contrast-checked themes",
   "No INTERNET permission",
-  "80 unit tests",
-  "1.9 MB release APK",
-  "MIT licensed",
+  "98 unit tests",
+  "3.99 MB APK · v0.4.0",
+  "MIT source · CC BY-SA data",
   "Built in Dhaka",
 ];

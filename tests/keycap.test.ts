@@ -95,7 +95,7 @@ describe("keycap specimen", () => {
   });
 
   it("keeps the proof panel and ticker factual and non-empty", () => {
-    expect(proofPoints.map((point) => point.value)).toEqual(["13", "80", "1.9", "0"]);
+    expect(proofPoints.map((point) => point.value)).toEqual(["13", "98", "3.99", "0"]);
     expect(tickerItems.length).toBeGreaterThanOrEqual(5);
     for (const item of tickerItems) expect(item.length).toBeGreaterThan(0);
   });

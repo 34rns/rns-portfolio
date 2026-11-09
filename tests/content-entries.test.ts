@@ -6,7 +6,7 @@ import {
   QUICKKIT_DOWNLOAD,
   selectContentEntries,
 } from "@/lib/projects/content";
-import { isReleaseDownloadLink, repoSlug } from "@/lib/projects/links";
+import { isLatestReleaseLink, isReleaseDownloadLink, repoSlug } from "@/lib/projects/links";
 
 type Row = { id: string; slug: string; title: string };
 
@@ -108,7 +108,7 @@ describe("project entries", () => {
 
   it("points the download link at a stable GitHub latest URL for its own repo", () => {
     for (const entry of projectEntries) {
-      expect(isReleaseDownloadLink(entry.liveUrl)).toBe(true);
+      expect(isReleaseDownloadLink(entry.liveUrl) || isLatestReleaseLink(entry.liveUrl)).toBe(true);
       expect(entry.liveUrl).toContain(repoSlug(entry.repoUrl) ?? "missing");
     }
     expect(QUICKKIT_DOWNLOAD).toBe(
@@ -121,6 +121,16 @@ describe("project entries", () => {
 });
 
 describe("release download links", () => {
+  it("distinguishes the latest release page from a direct asset", () => {
+    const latest = "https://github.com/34rns/shobdo-keyboard/releases/latest";
+    expect(isLatestReleaseLink(latest)).toBe(true);
+    expect(isLatestReleaseLink(`${latest}/`)).toBe(true);
+    expect(isReleaseDownloadLink(latest)).toBe(false);
+    expect(isLatestReleaseLink(`${latest}/download/old.apk`)).toBe(false);
+    expect(isLatestReleaseLink("https://example.com/a/b/releases/latest")).toBe(false);
+    expect(isLatestReleaseLink(null)).toBe(false);
+  });
+
   it("recognises a GitHub latest download URL", () => {
     expect(isReleaseDownloadLink(QUICKKIT_DOWNLOAD)).toBe(true);
     expect(

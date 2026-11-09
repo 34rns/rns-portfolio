@@ -190,7 +190,7 @@ Static checks and a host-logic test suite run with \`node tests/...\` and have n
     theme: "keycap",
     tags: ["Android", "Kotlin", "Jetpack Compose", "IME", "Bengali", "Open source"],
     liveUrl:
-      "https://github.com/34rns/shobdo-keyboard/releases/latest/download/Shobdo-Keyboard-v0.3.0.apk",
+      "https://github.com/34rns/shobdo-keyboard/releases/latest",
     repoUrl: "https://github.com/34rns/shobdo-keyboard",
     themeOptions: {},
     sortOrder: 1,
@@ -198,7 +198,7 @@ Static checks and a host-logic test suite run with \`node tests/...\` and have n
 
 Most Android keyboards treat Bangla as an afterthought: a transliteration mode bolted onto a QWERTY grid, or a desktop-era layout with no composing rules behind it. The good ones tend to be online, and the ones that are offline tend to look like utilities. Shobdo started from the opposite end — a keyboard built around the way Bangla is actually typed, then designed like a product rather than a settings screen.
 
-It is a real Android input method, not a web wrapper and not a demo. Kotlin and Jetpack Compose, a canvas keyboard core, six layout pages and a settings app that ships in the same APK. API 26 and up, target 35, MIT licensed.
+It is a real Android input method, not a web wrapper and not a demo. Kotlin and Jetpack Compose, a canvas keyboard core, six layout pages and a settings app that ships in the same APK. API 26 and up, target 35. The source code is MIT licensed; the bundled frequency data and its derived index are CC BY-SA 4.0, with attribution and licences in the APK.
 
 ## How the three modes work
 
@@ -210,9 +210,15 @@ It is a real Android input method, not a web wrapper and not a demo. Kotlin and 
 
 ## Ranking, not guessing
 
-v0.3.0 ships a Bangla frequency list of 83,433 words inside the APK. Every possible reading of the Roman buffer is scored against it and the common word comes first, which is the difference between a transliteration gimmick and something you can type a message with. The suggestion strip expands into a full candidate panel, and the keyboard can remember the words you pick so the next sentence is faster.
+v0.4.0 adds a packed reverse Roman index derived from the bundled 83,433-word Bangla frequency list. Common spellings such as \`bhalo\` and \`valo\` both suggest ভালো; \`kemon\` suggests কেমন, and \`kormo\` suggests কর্ম. Prefix completions appear before a word is finished, with spelling-error fallback, 126 original local words, names and loanwords, and a small table of next-word boosts.
 
-Nothing about that ranking leaves the device. The list is a bundled asset, read locally.
+The keyboard remembers picked words with bounded storage, contextual counts and 30-day decay. A user dictionary in settings lets you add or remove dialect words and names. Suggestions and automatic learning are suppressed in password, URL, email, numeric and other sensitive fields.
+
+On a fixed 422-case regression fixture, top-1 accuracy rose from 74.17% to 91.00%, and visible top-3 accuracy from 83.18% to 97.63%. These are regression results, not an independent accuracy study. Nothing about the ranking leaves the device: loading and lookup run on a background worker. [Benchmark details](https://github.com/34rns/shobdo-keyboard/blob/v0.4.0/docs/BENCHMARK.md).
+
+## Faster switching, reliable candidates
+
+Swipe the space bar to switch language as soon as the gesture crosses its threshold. The label changes immediately, with a cancellable 130 ms transition. The expanded candidate panel now opens and closes repeatedly, scrolls within the keyboard and consumes its own touches. Picking a word, switching language, clearing the buffer or hiding the keyboard collapses it.
 
 ## A theme collection, not a palette
 
@@ -230,21 +236,23 @@ Every pair is checked against a 4.5:1 contrast floor on the composited key colou
 
 ## Private by construction
 
-Shobdo has no \`INTERNET\` permission. That is not a promise in a policy document; the operating system will not let the app open a connection. There is no analytics SDK, no ad library, no crash reporter and no remote font. The only permission in the release manifest is \`VIBRATE\`.
+Shobdo has no \`INTERNET\` permission. That is not a promise in a policy document; the operating system will not let the app open a connection. There is no analytics SDK, no ad library, no crash reporter and no remote font. The release requests vibration and an app-specific, signature-protected AndroidX receiver permission.
 
 ## Under the hood
 
-The release is R8-shrunk, resource-shrunk and signed, and lands at 1.9 MB. Eighty unit tests cover the Banglish rules, the layout data, the theme schema and contrast, and the composing logic; lint reports zero errors. Four Python validators check layouts, themes, strings and the phonetic fixture without needing an Android build, and a PowerShell guard runs the same checks from both git hooks.
+The v0.4.0 release is R8-shrunk, resource-shrunk and signed, and lands at 3.99 MB. Ninety-eight unit tests cover the rules, reverse lookup, prefix completion, spelling fallback, context, learning decay, dictionary, sensitive fields, composing logic and gesture states; lint reports zero errors. Four Python validators check layouts, themes, strings and Banglish data without needing an Android build.
+
+Android 15 emulator checks covered all thirteen themes, three languages, three one-handed modes and two widths: 2,574 panel toggles and 234 immediate language switches. Warm lookup p95 was 2.16 ms in the final emulator run; cold asset loading took up to 1.44 seconds on a worker. Physical-phone frame timing and allocation profiling remain to be checked. [Release verification](https://github.com/34rns/shobdo-keyboard/blob/v0.4.0/docs/RELEASE_READINESS.md).
 
 Screenshots are real captures: the debug build running on Android 15, taken with \`adb exec-out screencap\` while Shobdo was the active input method, in a debug-only demo chat that never ships in a release APK.
 
 ## Install
 
-Download the APK from the latest release, open it on the phone, allow installing from that source, then follow the three setup steps — enable the keyboard, choose it, pick your languages and theme. Requires Android 8.0 (API 26) or newer.
+Open the latest GitHub release and download its APK. The release also includes a SHA-256 checksum. Open the APK on the phone, allow installing from that source, then follow the three setup steps — enable the keyboard, choose it, pick your languages and theme. Requires Android 8.0 (API 26) or newer. The release link follows new versions automatically.
 
 ## Still on the bench
 
-Automatic reph is not implemented yet, so \`kormo\` produces করমো rather than কর্ম. The Probhat uppercase alternates still want a native speaker's review, and a Jatiya layout plus a phonetic Bangla layout are the next decks on the list.`,
+Dictionary-based reph now handles words such as \`kormo\` → কর্ম; universal automatic reph remains limited. The Probhat uppercase alternates, new spellings and translated settings still want a native speaker's review. Physical-phone performance and a broader independent accuracy corpus are next, alongside Jatiya and phonetic Bangla layouts.`,
     defaultImages: {
       cover: "/projects/shobdo/cover.png",
       gallery: [

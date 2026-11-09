@@ -9,6 +9,11 @@ export function isReleaseDownloadLink(url: string | null | undefined): boolean {
   return Boolean(url && RELEASE_DOWNLOAD.test(url));
 }
 
+/** A release page follows new tags even when their asset filenames change. */
+export function isLatestReleaseLink(url: string | null | undefined): boolean {
+  return Boolean(url && /^https:\/\/github\.com\/[^/]+\/[^/]+\/releases\/latest\/?$/i.test(url));
+}
+
 /** `https://github.com/owner/repo` -> `owner/repo`, or null when it is not one. */
 export function repoSlug(repoUrl: string | null | undefined): string | null {
   if (!repoUrl) return null;

@@ -133,7 +133,10 @@ The page is data-driven where it matters:
   cover, so a project row can list all 22 assets without repeating one.
 - `ReleaseVersion` reads the live release tag from GitHub; the button says
   "Download APK" only when the URL is a stable `/releases/latest/download/`
-  link.
+  link. Shobdo uses `/releases/latest`, labelled "Latest release", because its
+  APK filenames contain the version. This follows new tags without a broken
+  asset URL; the badge updates automatically. Proof figures explicitly refer
+  to the verified v0.4.0 snapshot.
 
 ## Accessibility and performance
 
