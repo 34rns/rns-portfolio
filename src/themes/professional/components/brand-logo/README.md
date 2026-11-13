@@ -194,3 +194,40 @@ AGENTS.md is a pre-existing user edit, restored exactly and excluded from this
 commit. Four alternate user logo PNGs remain untracked and untouched. Evidence
 is gitignored. No dependencies were added. Finish with local commit, dev3000
 running, git diff --stat main saved, then wait for user review.
+
+## Resumed verification — 13 November 2026
+
+Recovered the interrupted Portfolio-2 session. Its last unresolved report was
+that the 3D logo and project controls did not work on port 3000. Port 3101 was
+an unwanted screenshot gallery; it remains closed. The remodel is the actual
+Professional landing at http://127.0.0.1:3000/, committed in 8a660b4 and the
+preceding landing-redesign commits.
+
+Next.js 16.4.2 blocks development requests from hostnames other than localhost
+and the explicitly initialized server hostname. The previous default-host
+server blocked 127.0.0.1 requests. The hostname fix had already taken effect
+when this session resumed. After stopping that server for the production
+build, restarted with `next dev --hostname 127.0.0.1 --port 3000`. Use
+`npm run dev -- --hostname 127.0.0.1 --port 3000` for subsequent restarts.
+No application source or next.config.ts change was needed.
+
+Fresh verification: lint and typecheck passed; all 260 tests in 31 files
+passed using the logo Vitest configuration with two workers; production build
+passed and still lists the landing as static with one-hour revalidation.
+Browser checks on the restarted dev server confirmed the Shobdo project tab
+updates the selected project, the real seven-part/one-hole 152,136-byte logo
+renders, and spin/pause/play respond. At 360, 390, 1440 and 1920px there was no
+horizontal overflow; the width-limit checks also confirmed one logo stage
+and an unclipped heading. No browser errors were captured. Three.js reports
+existing Clock/createShapes deprecation warnings; they do not block rendering.
+Temporary in-app viewport overrides were reset and the page reloaded before
+leaving the logo actively rendering in the normal preview.
+
+Evidence: screenshots/resume-2026-11-13/ contains desktop/mobile JPEGs,
+DOM state, responsive checks, dev process/log records and diff-stat-main.txt.
+These files are ignored. This resumption changes only this checkpoint.
+Application source, protected themes/pages, user edits and alternate logos
+remain as recovered. No push, deployment, paid service or database write.
+
+Next: review the actual remodel and 3D treatment on port 3000. Admin landing
+customization is still separately scoped after design selection.
