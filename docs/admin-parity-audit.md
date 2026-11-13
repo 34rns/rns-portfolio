@@ -40,9 +40,9 @@ The theme picker was already in the project editor, with Professional, Anime 3D,
 - Browser opened Orders, Licenses, Checkouts and 3D models, and verified their corresponding controls. Project editing exercised all six theme choices, accent input, paid-fields disclosure and real markdown preview; original values were restored without submission.
 - Final lint, typecheck, all 273 tests in 33 files and production build passed.
 - Rendered desktop and 390px/320px project editor/library checks passed; section shortcuts and keyboard focus reach their destinations without obscuring the heading.
-- No production data, project themes, buyer access, orders, licenses or model records were changed. Publish/delete/payment/access/model-upload actions were not executed against the live database; their original guarded source and existing tests were retained.
+- No project themes, buyer access, orders, licenses or model records were changed. Publish/delete/payment/access/model-upload actions were not executed against the live database; their original guarded source and existing tests were retained.
 - Model library and paid-project commerce data are currently empty, so data-dependent row controls were verified from source.
-- Update is local. Existing site_settings migration remains prepared and unapplied; deployment still requires an explicit go-live instruction.
+- The user subsequently authorized “Go live.” The update is deployed at https://rns-portfolio-teal.vercel.app/. The pending site_settings migration was applied and the live settings editor successfully saved and reloaded the unchanged initial defaults.
 
 ## Rendered evidence
 
@@ -64,6 +64,22 @@ Evidence is in screenshots/admin-parity-2026-11-13/:
 
 Native touch hardware, screen-reader speech and OS-level reduced-motion
 settings were not exercised in this follow-up.
+
+## Live release evidence
+
+Clean source from dd669c8 was deployed through the existing Vercel account.
+Deployment dpl_5obnAimnhNr5ruh8VwddBRZdbKfy is Ready and serves the public
+portfolio domain. Browser checked the live six-theme picker, sticky editor
+shortcuts, Connected database status and initial draft persistence. The
+public sculpture controls, project selection and Shobdo case-study route
+worked, and desktop/phone layouts showed no horizontal overflow.
+
+All ten legacy app tables were backed up locally before migration; their
+row fingerprints remained identical afterward, including after the initial
+settings save. The new settings singleton is at revision 1, with matching
+draft and public defaults. Live evidence and the previous deployment for
+rollback are recorded in screenshots/go-live-2026-11-13/release.json and
+the interactive-studio checkpoint.
 
 ## Changed files and reasons
 

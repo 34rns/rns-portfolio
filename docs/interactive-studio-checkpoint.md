@@ -20,8 +20,8 @@ This supersedes the editorial landing from commit 2012867. The user authorized a
 Development defaults to private .local/site-settings.json, ignored by Git. Local writes use an atomic rename, a process queue and revision checks. A draft save never alters the published settings.
 Production defaults to the Postgres adapter; it uses a singleton and conditional revision checks for cross-process conflicts. Missing/broken storage keeps the default public site usable and disables editor writes with an explicit error.
 
-The generated migration drizzle/0005_sad_orphan.sql adds only site_settings. **It was not applied.** Production DB content was only read during development/builds; no project, model, commerce or settings rows were mutated. Local draft/publish browser tests ended with both draft and published defaults restored at revision 3.
-Deployment and applying the prepared migration remain separately scoped to the user's explicit go-live request. No push, deployment, paid services or new runtime packages.
+The generated migration drizzle/0005_sad_orphan.sql adds only site_settings. It remained unapplied during local implementation and was applied in the authorized go-live follow-up below. Production DB content was read-only during development/builds. Local draft/publish browser tests ended with both draft and published defaults restored at revision 3.
+The user explicitly authorized production with “Go live.” No Git push or new runtime packages were needed; deployment used the existing Vercel account and project.
 
 ## Verification
 
@@ -48,7 +48,8 @@ All screenshots and runtime logs are local/ignored under screenshots/interactive
 - task-diff-stat.txt: task-only diff statistics against the preceding editorial commit.
 
 The dev server is restored at http://127.0.0.1:3000/. Customization: http://127.0.0.1:3000/admin/site.
-Next: user review of this complete local direction; production activation requires the migration and an explicit go-live instruction.
+Live: https://rns-portfolio-teal.vercel.app/. Customization: https://rns-portfolio-teal.vercel.app/admin/site.
+Next: user review of the live portfolio; content and appearance updates are available through the live admin.
 
 ## Follow-up — old admin feature parity
 
@@ -62,8 +63,20 @@ which records the inventory, verification scope and this follow-up's file reason
 Final production review covered 1440px, 390px and 320px editor/library
 layouts, theme deep links, keyboard section focus and the public homepage.
 Evidence is in screenshots/admin-parity-2026-11-13/. The dev server is
-restored at http://127.0.0.1:3000/ with local site settings; production data
-and the prepared migration remain unchanged.
+restored at http://127.0.0.1:3000/ with local site settings. The go-live
+follow-up below records production activation; legacy content remains intact.
+
+## Go live — 13 November 2026
+
+- User authorized production deployment with “Go live.” Deployed clean committed source from dd669c8, including the interactive studio and admin parity update.
+- Vercel deployment dpl_5obnAimnhNr5ruh8VwddBRZdbKfy is Ready and aliased to https://rns-portfolio-teal.vercel.app/. Immutable URL: https://rns-portfolio-pwxjqjhxf-fakerns-projects.vercel.app/.
+- The first attempt inherited an unauthorized Git-author identity from the parent checkout and was blocked. The successful release used a standalone Git export and the project owner's authenticated Vercel account; project security settings were not changed.
+- Applied only the pending 0005_sad_orphan migration. Existing migrations matched after accounting for Windows line endings. All ten existing app tables were backed up privately to backups/release-dd669c8-20261113.json; before/after row fingerprints matched.
+- Live admin displayed Connected database. Saving the unchanged initial defaults created the site_settings singleton at revision 1; reload retained it. Draft and public values match, with no project, buyer, license or model records changed.
+- Production build, fresh lint/typecheck and all 273 tests in 33 files passed. Lint excluded temporary .vercel release artifacts. Browser checked desktop 1440px and phone 390px with no horizontal overflow, sculpture pause/rotate/disassemble/assemble/play, project selection and the Shobdo case-study route. All six themes and the styled editor shortcuts are present in the live admin.
+- Previous Ready deployment for rollback: https://rns-portfolio-i77k14o5l-fakerns-projects.vercel.app/ (dpl_28NWbBvzMXg1XHj819Z7aMfF4VXP).
+- Evidence: screenshots/go-live-2026-11-13/release.json, production-build.log, live-home-desktop.png, live-home-mobile.png and admin-site-editor.png. The temporary production environment download was removed.
+- Local dev remains at http://127.0.0.1:3000/. The pre-existing AGENTS.md edit and four untracked alternate logos remain untouched.
 
 ## File-by-file reasons
 
