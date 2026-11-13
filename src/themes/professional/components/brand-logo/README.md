@@ -310,3 +310,37 @@ four untracked alternate logo PNGs are untouched. No dependencies were added.
 Next: user review at http://127.0.0.1:3000/. Admin landing customization and
 publishing remain separately scoped. The refinement is saved as a local commit
 after this checkpoint; git diff --stat main is retained with the evidence.
+
+## Cursor checkpoint — 13 November 2026
+
+The user asked for a unique cursor matching the theme. Added a white pointer
+with yellow pixel accents and a small three-pixel companion inspired by the
+logo's staircase. It compresses over controls and becomes a clipped yellow
+View badge over project cards/previews. The native pointer stays precise;
+the companion is decorative and cannot intercept clicks.
+
+The companion hides over reading/editing text, selection, keyboard activity,
+window blur and page exit. Touch/coarse-pointer, reduced-motion, forced-colors
+and disabled-motion settings keep the standard pointer. Positions are written
+directly by a coalesced animation frame on pointer/scroll input, with no idle
+render loop or React state updates for each mouse move. All listeners clean up
+when leaving the landing. Other themes retain their existing cursor.
+
+Lint, typecheck, 260 tests/31 files and production build passed. Browser checks
+confirmed the View mode, selection/keyboard hiding and unchanged 390px layout
+with no overflow and one logo. Dev was restarted at 127.0.0.1:3000. Evidence:
+screenshots/cursor-2026-11-13/. The original AGENTS.md edit and alternate logos
+remain untouched. No dependencies, database writes, push or deployment.
+
+| File | Why it changed |
+| --- | --- |
+| public/brand/rns-cursor.svg | Crisp native pointer based on the existing white/yellow pixel motif |
+| src/themes/professional/components/studio-cursor.tsx | Landing-only decorative companion, hover states and device/accessibility policy |
+| src/themes/professional/landing.tsx | Mounts the cursor with the existing motion preference |
+| src/themes/professional/landing-styles.ts | Scoped pointer, pixel/View styling and standard cursor fallbacks |
+| src/themes/professional/components/brand-logo/README.md | Cursor decisions, verification and file explanations |
+
+Next: skills-assisted review requested by the user. Emil, Impeccable and Taste
+Skill were installed from their publishers' repositories; existing
+frontend-design matches Anthropic's current official source. Installation
+manifest: C:/Users/SIAM/.codex/toolkit/design-skills-2026-11-13.json.

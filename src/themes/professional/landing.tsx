@@ -4,6 +4,7 @@ import { site } from "@/content/site";
 import type { ProjectView } from "@/lib/projects/view";
 import { Hero } from "./components/hero";
 import { LandingMotion } from "./components/landing-motion";
+import { StudioCursor } from "./components/studio-cursor";
 import { MagneticLink } from "./components/magnetic-link";
 import { WorkIndex } from "./components/work-index";
 import { professionalLandingStyles } from "./landing-styles";
@@ -26,6 +27,7 @@ export function ProfessionalLanding({ projects, content = professionalLandingCon
     <div id="top" className="rns-landing" data-brand-tone="light" data-motion-enabled={content.motion.enabled}>
       <style>{brandCss + professionalLandingStyles}</style>
       <LandingMotion />
+      <StudioCursor enabled={content.motion.enabled} />
       <div className="rns-opening" data-brand-tone="dark"><SiteHeader note={content.headerNote} /></div>
       <main id="main" tabIndex={-1}>
         <div className="rns-opening" data-brand-tone="dark">
