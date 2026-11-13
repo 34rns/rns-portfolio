@@ -1,168 +1,62 @@
+import { brandCss } from "@/brand/tokens";
+import Image from "next/image";
+import Link from "next/link";
 import { site } from "@/content/site";
 import type { ProjectView } from "@/lib/projects/view";
 import { Hero } from "./components/hero";
+import { LandingMotion } from "./components/landing-motion";
 import { MagneticLink } from "./components/magnetic-link";
 import { WorkIndex } from "./components/work-index";
+import { professionalLandingStyles } from "./landing-styles";
 
 const capabilities = [
-  {
-    title: "Product engineering",
-    body: "Next.js and TypeScript on the front, Postgres and auth behind it. Built to deploy, not to demo.",
-  },
-  {
-    title: "Interface design",
-    body: "Typography, grid, and token systems that survive contact with real content and real screens.",
-  },
-  {
-    title: "Motion & interaction",
-    body: "Scroll choreography, hover states, and transitions with a reduced-motion path for everyone else.",
-  },
-  {
-    title: "Games & 3D",
-    body: "Unity, C#, and shader work — the same craft applied to a scene instead of a page.",
-  },
+  { title: "Product engineering", tools: "Next.js / TypeScript / Postgres", body: "The interface, the data, the authentication, and the path to production. One connected system." },
+  { title: "Interface design", tools: "Typography / Layout / Design systems", body: "Clear hierarchy and considered details that hold up on real screens, with real content." },
+  { title: "Motion & interaction", tools: "Scroll / Transitions / Micro-interactions", body: "Movement that makes an interface easier to understand, with a quieter path when you need it." },
+  { title: "Games & 3D", tools: "Unity / C# / Shaders", body: "A different medium for the same craft: responsive scenes, character rigs, and playful experiments." },
 ];
 
 function SiteHeader() {
   return (
-    <header className="mx-auto flex max-w-[1440px] items-center justify-end px-5 pt-7 md:px-10">
-      <nav
-        aria-label="Primary"
-        className="ml-auto flex items-center gap-5 text-[0.95rem]"
-      >
-        <a href="#work" className="nav-link inline-flex min-h-11 items-center">
-          Work
-        </a>
-        <a href="#about" className="nav-link inline-flex min-h-11 items-center">
-          About
-        </a>
-        <a
-          href={site.github}
-          target="_blank"
-          rel="noreferrer"
-          className="nav-link inline-flex min-h-11 items-center"
-          data-cursor="view"
-        >
-          GitHub
-        </a>
+    <header className="rns-header rns-shell">
+      <Link className="rns-brand" href="#top" aria-label="RNS home">
+        <Image src="/brand/rns-mark.svg" alt="" width={72} height={29} unoptimized />
+        <span className="rns-wordmark">34rns</span>
+      </Link>
+      <nav aria-label="Primary">
+        <Link href="#work">Work</Link><Link href="#about">About</Link><Link href="#contact">Contact</Link>
+        <a href={site.github} target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
       </nav>
     </header>
   );
 }
 
-function About() {
-  return (
-    <section id="about" className="mx-auto mt-28 max-w-[1440px] px-5 md:px-10">
-      <div className="grid gap-8 border-t border-[var(--theme-line)] pt-8 md:grid-cols-12 md:gap-10">
-        <h2 className="text-[1.05rem] md:col-span-3">About</h2>
-        <div className="space-y-6 text-[1.18rem] leading-[1.72] md:col-span-8 md:col-start-5">
-          <p>
-            I&apos;m RNS — a full-stack engineer who cares about how things feel,
-            not just whether they work. My work sits where product engineering
-            meets interface design: commerce, tools, interaction, and the
-            occasional 3D detour.
-          </p>
-          <p>
-            Most of what I build starts in the browser and ends in production.
-            MoneyKick Shop runs a real storefront with Bkash payments for the
-            Bangladesh market. RISE turns workouts into a rank-up loop.
-            OfficeChaos is a Unity playground for shaders and character rigs.
-            Different mediums, same obsession: make it fast, make it legible,
-            make it feel alive.
-          </p>
-        </div>
-      </div>
-
-      <dl className="mt-10 grid gap-x-8 gap-y-5 border-t border-[var(--theme-line)] pt-6 sm:grid-cols-3">
-        <div>
-          <dt className="mono text-[var(--theme-muted)]">Focus</dt>
-          <dd className="mt-1 text-[1.02rem]">Product engineering</dd>
-        </div>
-        <div>
-          <dt className="mono text-[var(--theme-muted)]">Stack</dt>
-          <dd className="mt-1 text-[1.02rem]">TypeScript, Next.js, Postgres</dd>
-        </div>
-        <div>
-          <dt className="mono text-[var(--theme-muted)]">Also</dt>
-          <dd className="mt-1 text-[1.02rem]">Unity, C#, motion design</dd>
-        </div>
-      </dl>
-    </section>
-  );
-}
-
-function Capabilities() {
-  return (
-    <section className="mx-auto mt-28 max-w-[1440px] px-5 md:px-10">
-      <div className="grid gap-8 border-t border-[var(--theme-line)] pt-8 md:grid-cols-12 md:gap-10">
-        <h2 className="text-[1.05rem] md:col-span-3">What I do</h2>
-        <ul className="md:col-span-8 md:col-start-5">
-          {capabilities.map((item) => (
-            <li
-              key={item.title}
-              className="grid gap-2 border-b border-[var(--theme-line)] py-6 first:pt-0 last:border-b-0 sm:grid-cols-[14rem_1fr] sm:gap-6"
-            >
-              <span className="text-[1.12rem]">{item.title}</span>
-              <span className="text-[1.02rem] leading-[1.65] text-[var(--theme-muted)]">
-                {item.body}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-function Contact() {
-  return (
-    <section id="contact" className="mx-auto mt-28 max-w-[1440px] px-5 md:px-10">
-      <div className="border-t border-[var(--theme-line)] pt-8">
-        <p className="display max-w-[22ch] text-[clamp(2.4rem,7vw,6rem)] font-medium">
-          Have something worth building?
-        </p>
-        <p className="mt-6 max-w-[44ch] text-[1.08rem] leading-[1.7] text-[var(--theme-muted)]">
-          The fastest way to reach me is on GitHub. I read everything and reply
-          there.
-        </p>
-        <div className="mt-8">
-          <MagneticLink href={site.github} external>
-            @{site.handle}
-          </MagneticLink>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="mx-auto mt-24 flex max-w-[1440px] flex-wrap items-baseline justify-between gap-4 border-t border-[var(--theme-line)] px-5 py-6 md:px-10">
-      <span className="mono text-[var(--theme-muted)]">
-        © {new Date().getFullYear()} RNS
-      </span>
-      <span className="mono text-[var(--theme-muted)]">
-        Next.js, Postgres, Vercel
-      </span>
-      <a href="#top" className="mono nav-link text-[var(--theme-muted)]">
-        Back to top
-      </a>
-    </footer>
-  );
-}
-
 export function ProfessionalLanding({ projects }: { projects: ProjectView[] }) {
   return (
-    <div id="top" className="relative overflow-x-clip">
+    <div id="top" className="rns-landing" data-brand-tone="light">
+      <style>{brandCss + professionalLandingStyles}</style>
+      <LandingMotion />
       <SiteHeader />
-      <main id="main">
+      <main id="main" tabIndex={-1}>
         <Hero latest={projects[0]} />
+        <section id="about" className="rns-about rns-shell" aria-labelledby="rns-about-title">
+          <div className="rns-about-heading" data-reveal><span className="rns-section-label">About</span><h2 id="rns-about-title">From interface<br />to infrastructure.</h2></div>
+          <div className="rns-about-copy" data-reveal>
+            <p>My work sits where product engineering meets interface design. I care as much about the database and deployment as the spacing, response, and feel.</p>
+            <p>Most of what I build starts in the browser and ends in production. Commerce, everyday tools, a Bengali keyboard, and the occasional Unity detour. Different mediums, the same care.</p>
+            <a className="rns-text-link" href={site.github} target="_blank" rel="noreferrer">Explore my repositories <span aria-hidden="true">↗</span></a>
+          </div>
+        </section>
         <WorkIndex projects={projects} />
-        <About />
-        <Capabilities />
-        <Contact />
+        <section id="skills" className="rns-skills rns-shell" aria-labelledby="rns-skills-title">
+          <div className="rns-section-heading" data-reveal><h2 id="rns-skills-title">What I bring<br />to a build.</h2><p>From the first sketch to the last detail.</p></div>
+          <ul className="rns-capabilities">{capabilities.map(item => <li key={item.title} data-reveal><h3>{item.title}</h3><div><p>{item.body}</p><span>{item.tools}</span></div></li>)}</ul>
+        </section>
+        <section id="contact" className="rns-contact" data-brand-tone="dark" aria-labelledby="rns-contact-title">
+          <div className="rns-shell rns-contact-inner"><div data-reveal><span className="rns-section-label">Have a project in mind?</span><h2 id="rns-contact-title">Let&apos;s make<br />something useful.</h2></div><div className="rns-contact-copy" data-reveal><p>The fastest way to reach me is on GitHub. Share what you&apos;re working on, and let&apos;s start there.</p><MagneticLink href={site.github} external>@{site.handle} <span aria-hidden="true">↗</span></MagneticLink></div></div>
+        </section>
       </main>
-      <Footer />
+      <footer className="rns-footer rns-shell"><span>© {new Date().getFullYear()} RNS</span><span>Engineering &amp; interface design</span><Link href="#top">Back to top <span aria-hidden="true">↑</span></Link></footer>
     </div>
   );
 }
