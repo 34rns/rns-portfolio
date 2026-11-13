@@ -50,6 +50,21 @@ All screenshots and runtime logs are local/ignored under screenshots/interactive
 The dev server is restored at http://127.0.0.1:3000/. Customization: http://127.0.0.1:3000/admin/site.
 Next: user review of this complete local direction; production activation requires the migration and an explicit go-live instruction.
 
+## Follow-up — old admin feature parity
+
+The user requested a comparison against the old admin, especially the theme
+picker. All 26 old admin/API files remain present, with 20 unchanged legacy
+implementations. All six project themes, uploads, model controls, publishing,
+monetization and commerce workflows remain available. A Theme link and editor
+section shortcuts make the controls easier to reach; project update dates
+were restored. Continue from [the full parity audit](admin-parity-audit.md),
+which records the inventory, verification scope and this follow-up's file reasons.
+Final production review covered 1440px, 390px and 320px editor/library
+layouts, theme deep links, keyboard section focus and the public homepage.
+Evidence is in screenshots/admin-parity-2026-11-13/. The dev server is
+restored at http://127.0.0.1:3000/ with local site settings; production data
+and the prepared migration remain unchanged.
+
 ## File-by-file reasons
 
 | File | Why it changed |

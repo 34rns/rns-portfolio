@@ -120,8 +120,16 @@ export function ProjectForm({
     : selectedTheme?.accent ?? "#1B3BFF";
 
   return (
-    <form action={action} className="mt-6">
+    <form action={action} className="mt-6 admin-project-form">
       {project.id ? <input type="hidden" name="id" value={project.id} /> : null}
+      <nav aria-label="Project settings sections" className="admin-project-sections">
+        <a href="#project-basics">Basics</a>
+        <a href="#project-media">Media &amp; links</a>
+        <a href="#project-model">3D model</a>
+        <a href="#project-theme">Theme &amp; accent</a>
+        <a href="#project-placement">Publishing</a>
+        <a href="#project-monetization">Monetization</a>
+      </nav>
 
       {state?.error ? (
         <p
@@ -134,7 +142,7 @@ export function ProjectForm({
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-8">
-          <section className="border border-[#E1E1DA] bg-white p-5">
+          <section id="project-basics" tabIndex={-1} className="border border-[#E1E1DA] bg-white p-5">
             <h2 className="text-sm font-medium">Basics</h2>
             <div className="mt-4 grid gap-4">
               <div>
@@ -244,7 +252,7 @@ export function ProjectForm({
             </div>
           </section>
 
-          <section className="border border-[#E1E1DA] bg-white p-5">
+          <section id="project-media" tabIndex={-1} className="border border-[#E1E1DA] bg-white p-5">
             <h2 className="text-sm font-medium">Links and media</h2>
             <div className="mt-4 grid gap-4">
               <div className="grid gap-4 sm:grid-cols-2">
@@ -359,7 +367,7 @@ export function ProjectForm({
             </div>
           </section>
 
-          <section className="border border-[#E1E1DA] bg-white p-5">
+          <section id="project-model" tabIndex={-1} className="border border-[#E1E1DA] bg-white p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="text-sm font-medium">3D model</h2>
               <span className="mono text-[#6B6B64]">Optional</span>
@@ -495,8 +503,9 @@ export function ProjectForm({
         </div>
 
         <div className="space-y-6">
-          <section className="border border-[#E1E1DA] bg-white p-5">
+          <section id="project-theme" tabIndex={-1} className="border border-[#E1E1DA] bg-white p-5">
             <h2 className="text-sm font-medium">Theme</h2>
+            <p className="mt-2 text-xs leading-relaxed text-[#6B6B64]">Choose the layout and accent for this case study. Homepage appearance is in the <Link href="/admin/site" className="underline">Site editor</Link>.</p>
             <div className="mt-4">
               <label className="admin-label" htmlFor="theme">
                 Layout
@@ -557,7 +566,7 @@ export function ProjectForm({
             </div>
           </section>
 
-          <section className="border border-[#E1E1DA] bg-white p-5">
+          <section id="project-placement" tabIndex={-1} className="border border-[#E1E1DA] bg-white p-5">
             <h2 className="text-sm font-medium">Placement</h2>
             <div className="mt-4 space-y-4">
               <div>
@@ -608,7 +617,7 @@ export function ProjectForm({
             </div>
           </section>
 
-          <section className="border border-[#E1E1DA] bg-white p-5">
+          <section id="project-monetization" tabIndex={-1} className="border border-[#E1E1DA] bg-white p-5">
             <h2 className="text-sm font-medium">Monetization</h2>
             <p className="mt-1 text-xs leading-relaxed text-[#6B6B64]">
               Paid projects show a buy panel. Buyers unlock the live URL and the delivery note.
