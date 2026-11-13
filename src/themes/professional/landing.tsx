@@ -19,7 +19,7 @@ const capabilities = [
 function SiteHeader() {
   return (
     <header className="rns-header rns-shell">
-      <Link className="rns-brand" href="#top" aria-label="RNS home">
+      <Link className="rns-brand" href="#top" aria-label="RNS home — 34rns">
         <Image src="/brand/rns-mark.svg" alt="" width={72} height={29} unoptimized />
         <span className="rns-wordmark">34rns</span>
       </Link>

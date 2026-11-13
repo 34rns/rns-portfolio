@@ -131,7 +131,7 @@ export const professionalLandingStyles = `
 :root:has(.rns-landing) .intro,:root:has(.rns-landing) .cursor-dot { display:none!important; }
 :root:has(.rns-landing) .skip-link { background:#17191C; color:#FFC900; }
 :root:has(.rns-landing) .skip-link:focus-visible { outline-color:#17191C; }
-@keyframes rns-reveal { from { opacity:.65; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+@keyframes rns-reveal { from { transform:translateY(24px); } to { transform:translateY(0); } }
 @keyframes rns-arrive { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
 .rns-hero h1 { animation:rns-arrive 700ms cubic-bezier(.16,1,.3,1) both; }
 .rns-hero-description,.rns-hero-actions,.rns-latest { animation:rns-arrive 650ms 120ms cubic-bezier(.16,1,.3,1) both; }

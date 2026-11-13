@@ -13,7 +13,7 @@ export function WorkIndex({ projects }: { projects: ProjectView[] }) {
         <ul className="rns-project-grid">
           {projects.map((project, index) => (
             <li key={project.slug} className={index === 0 ? "rns-project rns-project-lead" : index === projects.length - 1 && projects.length % 2 === 0 ? "rns-project rns-project-tail" : "rns-project"} data-reveal>
-              <Link href={`/projects/${project.slug}`} className="rns-project-link" prefetch={false} aria-labelledby={`project-${project.slug}`}>
+              <Link href={`/projects/${project.slug}`} className="rns-project-link" prefetch={false}>
                 <div className="rns-project-image"><Cover project={project} ratio="16 / 10" sizes={index === 0 ? "(min-width: 900px) 760px, (min-width: 640px) 90vw, calc(100vw - 40px)" : "(min-width: 900px) 600px, (min-width: 640px) 44vw, calc(100vw - 40px)"} /></div>
                 <div className="rns-project-copy" data-brand-tone={index === 0 ? "dark" : "light"}>
                   <div className="rns-project-meta"><span>{project.year}</span><span>{project.isPaid ? "Pro project" : "Case study"}</span></div>

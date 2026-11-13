@@ -18,6 +18,7 @@ export const metadata: Metadata = {
     title: `${site.name} — ${site.role}`,
     description: site.description,
     url: "/",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: `${site.name} — ${site.role}` }],
   },
   twitter: {
     card: "summary_large_image",
