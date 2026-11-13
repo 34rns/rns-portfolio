@@ -231,3 +231,82 @@ remain as recovered. No push, deployment, paid service or database write.
 
 Next: review the actual remodel and 3D treatment on port 3000. Admin landing
 customization is still separately scoped after design selection.
+
+## Layout and logo refinement — 13 November 2026
+
+The user requested a better-looking portfolio and identified both the layout
+and 3D logo. This checkpoint supersedes the earlier hero-only visual review,
+default-logo paths, material descriptions and geometry byte counts. Historical
+Lighthouse scores above predate this refinement and are not current measurements.
+
+The introduction is a single copy block with a shorter two-line headline,
+balanced desktop columns and copy first on mobile. A graphite frame contains
+the logo and its controls. The entire logo now rotates together, with shallower
+extrusion, smaller bevels, less float/tilt and clearer white/yellow faces.
+The showcase gives the main preview more space, uses underlined project tabs
+and quieter side previews. About now uses a white surface; the contact arc is
+removed. Header structure, project content and other themes are preserved.
+
+Transparent fallback WebPs were generated locally from the existing lossless
+PNG. Black becomes alpha and white/yellow retain the brand colors. Desktop is
+1400×556 / 65,210 bytes; mobile is 640×254 / 28,606 bytes. Existing opaque assets
+remain available. Custom logo content still uses its supplied source and a
+static fallback. The default fallback remains in the initial HTML.
+
+Paused/offscreen scenes use demand rendering with an inactive-frame guard.
+This keeps motion frozen while allowing a resize to redraw the canvas; the
+previous never-render mode could leave it blank after resizing while paused.
+SVG shape creation uses path.toShapes() to remove the deprecated loader call.
+
+### Current verification
+
+- Lint and typecheck passed; logs are lint.log and typecheck.log.
+- All 260 tests in 31 files passed with
+  `npm test -- --config src/themes/professional/components/brand-logo/vitest.config.mts --maxWorkers=2`.
+- Production build passed. Landing remains static with one-hour revalidation;
+  production HTTP returned 200, cache HIT and the prerender flag.
+- Browser checks at 360, 390, 768, 1024, 1440 and 1920px found no horizontal
+  page overflow, no clipped headline, one logo stage and usable 44px+ controls.
+- Arrow-key project selection, Shobdo case-study navigation, whole-logo spin,
+  pause and paused mobile resize were exercised. Geometry is seven parts,
+  one preserved hole and 211,104 bytes, below the 300KB guard.
+- Desktop/mobile hero, showcase, About, work and contact were visually reviewed.
+  Anime RISE, synthwave WorkWing and cyberpunk Loupe pages still render.
+- All 165 protected source-file snapshots matched exactly. No browser errors
+  were captured in the final review; the existing Three.Clock warning may remain.
+- Production was stopped after verification and dev was restarted with explicit
+  `--hostname 127.0.0.1 --port 3000`. HTTP 200 and the ready 3D logo were verified
+  again; temporary viewport overrides were reset and the preview retained.
+
+Evidence: `screenshots/landing-refinement-2026-11-13/` contains before/after
+desktop, mobile, full-page and protected-theme captures, build/check logs,
+responsive.json, protected-source.json, HTTP records and dev process/log records.
+Evidence is gitignored. No push, deployment, paid service or database write.
+
+### Files changed by this refinement
+
+Paths below are relative to the repository. The earlier “Every file against
+main” table explains all prior branch changes; these entries update that table
+for the current behavior and include both new assets.
+
+| File | Why it changed |
+| --- | --- |
+| src/themes/professional/landing-content.ts | Shorter personal introduction and transparent default logo source |
+| src/themes/professional/components/hero.tsx | Grouped copy before logo on mobile; unified defaults and transparent poster selection |
+| src/themes/professional/components/brand-logo/hero-styles.ts | Balanced columns, framed logo, contained controls and responsive spacing |
+| src/themes/professional/components/brand-logo/logo-geometry.ts | Shallower extrusion, finer bevels and current SVG shape API |
+| src/themes/professional/components/brand-logo/logo-scene.tsx | Whole-logo rotation, restrained motion, clearer materials and paused resize redraw |
+| src/themes/professional/components/brand-logo/logo-stage.tsx | Clearer “Rotate logo” control label |
+| src/themes/professional/landing-styles.ts | Cleaner project tabs/preview hierarchy, restrained controls and neutral section transitions |
+| public/brand/rns-mark-alpha.webp | Transparent desktop poster without a black rectangle |
+| public/brand/rns-mark-mobile-alpha.webp | Smaller transparent mobile poster embedded in initial HTML |
+| src/themes/professional/components/brand-logo/README.md | Current decisions, verification, evidence and file explanations |
+
+The earlier landing.tsx table entry’s “yellow about” describes a prior round;
+the current section is white through scoped landing styles. AGENTS.md remains
+the exact pre-existing user edit and is excluded from this local commit. The
+four untracked alternate logo PNGs are untouched. No dependencies were added.
+
+Next: user review at http://127.0.0.1:3000/. Admin landing customization and
+publishing remain separately scoped. The refinement is saved as a local commit
+after this checkpoint; git diff --stat main is retained with the evidence.

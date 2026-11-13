@@ -16,13 +16,13 @@ export type LandingContent = {
 };
 
 export const professionalLandingContent: LandingContent = {
-  brand: { logoSrc: "/brand/rns-mark.webp", logoAlt: "RNS logo in white and electric yellow" },
+  brand: { logoSrc: "/brand/rns-mark-alpha.webp", logoAlt: "RNS logo in white and electric yellow" },
   headerNote: "Independent development & interface design",
   hero: {
-    role: "From interface to infrastructure",
-    headline: ["Built to work.", "Made to feel."],
-    description: "I turn ideas into tools people actually use. From the first interface to the system behind it, every detail has a job.",
-    primaryLabel: "Explore the work", secondaryLabel: "Get in touch",
+    role: "Hey, I’m RNS.",
+    headline: ["Tools for people", "who make things."],
+    description: "Editing tools, a Bengali keyboard, and playful experiments. I build software that makes everyday creative work feel a little better.",
+    primaryLabel: "Explore my work", secondaryLabel: "Get in touch",
   },
   showcase: { label: "Inside the work", linkLabel: "Explore project" },
   about: {

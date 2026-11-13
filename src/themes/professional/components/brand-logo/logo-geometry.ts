@@ -3,8 +3,8 @@ import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 export function extrudeShape(shape: Shape): BufferGeometry {
-  const raw = new ExtrudeGeometry(shape, { depth: .22, steps: 1, bevelEnabled: true, bevelThickness: .028, bevelSize: .022, bevelSegments: 2, curveSegments: 1 });
-  raw.translate(0, 0, -.11);
+  const raw = new ExtrudeGeometry(shape, { depth: .14, steps: 1, bevelEnabled: true, bevelThickness: .02, bevelSize: .014, bevelSegments: 3, curveSegments: 1 });
+  raw.translate(0, 0, -.07);
   raw.deleteAttribute("uv");
   const geometry = mergeVertices(raw, .00001);
   raw.dispose();
@@ -39,7 +39,7 @@ function ring(points: Vector2[], center: Vector2, scale: number) {
 
 export function buildLogoGeometry(svg: string) {
   const parsed = new SVGLoader().parse(svg);
-  const originals = parsed.paths.flatMap(path => SVGLoader.createShapes(path).map(shape => ({ shape, accent: path.color.getHexString().toLowerCase() === "ffc900" })));
+  const originals = parsed.paths.flatMap(path => path.toShapes().map(shape => ({ shape, accent: path.color.getHexString().toLowerCase() === "ffc900" })));
   const box = new Box2().setFromPoints(originals.flatMap(p => p.shape.getPoints(3)));
   const center = box.getCenter(new Vector2());
   const size = box.getSize(new Vector2());

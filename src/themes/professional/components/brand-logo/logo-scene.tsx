@@ -29,7 +29,7 @@ function StudioEnvironment() {
     return environment;
   }, [gl]);
   useEffect(() => () => target.dispose(), [target]);
-  return <Environment map={target.texture} environmentIntensity={.8} />;
+  return <Environment map={target.texture} environmentIntensity={.65} />;
 }
 
 function Logo({ svg, ...props }: SceneProps & { svg: string }) {
@@ -51,10 +51,12 @@ function Logo({ svg, ...props }: SceneProps & { svg: string }) {
   const notified = useRef(false);
   const finished = useRef(false);
   const spinState = useRef({ command: props.spin, start: -10 });
+  const yaw = useRef(-.16);
   const width = useThree(state => state.size.width);
   useEffect(() => () => { model.parts.forEach(part => part.geometry.dispose()); floor.dispose(); }, [model, floor]);
 
   useFrame((_, delta) => {
+    if (!props.active && notified.current) return;
     elapsed.current += Math.min(delta, .05);
     const time = elapsed.current;
     const introTime = props.skipIntro ? 2 : time;
@@ -67,16 +69,17 @@ function Logo({ svg, ...props }: SceneProps & { svg: string }) {
     const scroll = props.scroll.current;
     if (group.current) {
       const blend = 1 - Math.exp(-delta * 7);
-      group.current.rotation.x = MathUtils.lerp(group.current.rotation.x, .12 + p.y * .11 + Math.sin(time * .7) * .025, blend);
-      group.current.rotation.y = MathUtils.lerp(group.current.rotation.y, -.26 + p.x * .25 + scroll * .65 + Math.sin(time * .55) * .055, blend);
-      group.current.rotation.z = MathUtils.lerp(group.current.rotation.z, -.025 + p.x * .022, blend);
-      group.current.position.y = Math.sin(time * .8) * .045;
+      group.current.rotation.x = MathUtils.lerp(group.current.rotation.x, .06 + p.y * .07 + Math.sin(time * .7) * .012, blend);
+      yaw.current = MathUtils.lerp(yaw.current, -.16 + p.x * .18 + scroll * .35 + Math.sin(time * .55) * .025, blend);
+      group.current.rotation.y = yaw.current + spinAngle;
+      group.current.rotation.z = MathUtils.lerp(group.current.rotation.z, p.x * .012, blend);
+      group.current.position.y = Math.sin(time * .8) * .025;
       group.current.children.forEach((mesh, i) => {
         const progress = Math.max(0, Math.min(1, (introTime - i * .045) / .85));
         const settle = 1 - Math.pow(1 - progress, 3);
         const offset = 1 - settle;
-        mesh.position.set(model.parts[i].center[0] * offset * .18, (i % 2 ? -.3 : .3) * offset + Math.sin(progress * Math.PI) * .03, offset * .45);
-        mesh.rotation.y = -offset * .4 + spinAngle;
+        mesh.position.set(model.parts[i].center[0] * offset * .07, (i % 2 ? -.16 : .16) * offset, offset * .18);
+        mesh.rotation.y = -offset * .18;
         faces.current[i]!.opacity = Math.min(1, progress * 3);
       });
     }
@@ -85,17 +88,17 @@ function Logo({ svg, ...props }: SceneProps & { svg: string }) {
   });
 
   return <>
-    <OrthographicCamera makeDefault position={[0, 1.3, 12]} rotation={[-.1, 0, 0]} zoom={width / 9.2} near={.1} far={50} />
+    <OrthographicCamera makeDefault position={[0, 0, 12]} zoom={width / 10.2} near={.1} far={50} />
     <StudioEnvironment />
-    <ambientLight intensity={.2} />
-    <directionalLight position={[-3, 4, 6]} intensity={1.5} color="#FFFFFF" />
-    <directionalLight position={[4, 1, -2]} intensity={2.5} color="#FFFFFF" />
-    <pointLight position={[-4, -1, 3]} intensity={4} color="#FFC900" distance={12} />
+    <ambientLight intensity={.4} />
+    <directionalLight position={[-3, 4, 6]} intensity={2} color="#FFFFFF" />
+    <directionalLight position={[4, 1, -2]} intensity={1.7} color="#FFFFFF" />
+    <pointLight position={[-4, -1, 3]} intensity={1.5} color="#FFC900" distance={12} />
     <pointLight ref={sweep} position={[-5, 2, 3]} intensity={9} color="#FFFFFF" distance={10} />
     <group ref={group}>
       {model.parts.map((part, index) => <mesh key={index} geometry={part.geometry}>
-        <meshPhysicalMaterial ref={node => { faces.current[index] = node; }} attach="material-0" color={part.accent ? "#FFC900" : "#FFFFFF"} metalness={part.accent ? .45 : .3} roughness={part.accent ? .28 : .32} clearcoat={.65} clearcoatRoughness={.22} iridescence={part.accent ? .12 : .04} iridescenceIOR={1.3} iridescenceThicknessRange={[120, 360]} transparent />
-        <meshPhysicalMaterial attach="material-1" color={part.accent ? "#FFC900" : "#F3F4F5"} metalness={.85} roughness={.23} clearcoat={.4} />
+        <meshPhysicalMaterial ref={node => { faces.current[index] = node; }} attach="material-0" color={part.accent ? "#FFC900" : "#FFFFFF"} metalness={part.accent ? .18 : .08} roughness={.24} clearcoat={.8} clearcoatRoughness={.16} toneMapped={false} transparent />
+        <meshPhysicalMaterial attach="material-1" color={part.accent ? "#FFC900" : "#F3F4F5"} metalness={.5} roughness={.24} clearcoat={.5} />
       </mesh>)}
     </group>
     <mesh position={[0, -1.7, -.35]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[10, 6]} /><meshBasicMaterial color="#17191C" map={floor} transparent opacity={.65} depthWrite={false} /></mesh>
@@ -112,5 +115,5 @@ export function LogoScene(props: SceneProps) {
     return () => abort.abort();
   }, [onError]);
   if (!svg) return null;
-  return <Canvas dpr={[1, 1.5]} frameloop={props.active ? "always" : "never"} gl={{ antialias: true, alpha: true, powerPreference: "low-power" }} resize={{ scroll: false }} style={{ position: "absolute", inset: 0, pointerEvents: "none" }} onCreated={({ gl }) => gl.setClearColor("#000000", 0)}><Logo svg={svg} {...props} /></Canvas>;
+  return <Canvas dpr={[1, 1.5]} frameloop={props.active ? "always" : "demand"} gl={{ antialias: true, alpha: true, powerPreference: "low-power" }} resize={{ scroll: false }} style={{ position: "absolute", inset: 0, pointerEvents: "none" }} onCreated={({ gl }) => gl.setClearColor("#000000", 0)}><Logo svg={svg} {...props} /></Canvas>;
 }
