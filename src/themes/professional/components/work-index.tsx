@@ -6,7 +6,7 @@ export function WorkIndex({ projects }: { projects: ProjectView[] }) {
   return (
     <section id="work" className="rns-work rns-shell" aria-labelledby="rns-work-title">
       <div className="rns-section-heading" data-reveal>
-        <div><h2 id="rns-work-title">Selected work</h2><p>Different problems. The same attention to detail.</p></div>
+        <div><span className="rns-section-label">A few things I&apos;ve made</span><h2 id="rns-work-title">The work,<br />in the world.</h2></div>
         <span className="rns-project-count">{projects.length} projects</span>
       </div>
       {projects.length ? (
