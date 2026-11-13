@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { ArrowIcon } from "./icons";
 
 /** A logo-inspired pointer companion; never intercepts clicks or replaces text selection. */
 export function StudioCursor({ enabled }: { enabled: boolean }) {
@@ -69,6 +70,6 @@ export function StudioCursor({ enabled }: { enabled: boolean }) {
   }, [enabled]);
 
   return <div ref={cursor} className="rns-studio-cursor" aria-hidden="true" data-visible="false" data-mode="idle">
-    <div className="rns-cursor-chip"><i /><i /><i /><span>View <b>↗</b></span></div>
+    <div className="rns-cursor-chip"><i /><i /><i /><span>View <ArrowIcon /></span></div>
   </div>;
 }

@@ -344,3 +344,97 @@ Next: skills-assisted review requested by the user. Emil, Impeccable and Taste
 Skill were installed from their publishers' repositories; existing
 frontend-design matches Anthropic's current official source. Installation
 manifest: C:/Users/SIAM/.codex/toolkit/design-skills-2026-11-13.json.
+
+## Editorial checkpoint — 13 November 2026
+
+Project: D:/CustomCodex/rns-portfolio, branch landing-redesign. The user chose
+an editorial portfolio with expressive typography and larger project imagery.
+The charcoal/yellow identity, existing header structure, project records and
+database ordering remain. This is a local presentation change.
+
+The review found that the carousel repeated the project index, the logo panel
+competed with the actual work, missing covers created oversized text posters,
+and the conversation CTA opened a GitHub profile. The final landing uses one
+ordered gallery immediately after the compact hero, with full-width 16:9
+screenshots and two-column captions. Newsreader carries the hero and closing
+headline; Archivo carries project titles and navigation. The smaller 3D stage
+retains its rotation and pause controls. Capabilities now sit within About.
+The pixel cursor remains, with a View cue on project links and smaller button
+magnetism. Shared authored SVG arrows replace UI glyphs.
+
+| Before | After |
+| --- | --- |
+| Carousel and index repeat the same work | One ordered gallery with larger genuine covers |
+| Large logo panel and separate capability section | Compact logo and capabilities integrated into About |
+| Decorative labels and repeated reveals | Headings and images establish hierarchy directly |
+| Start a conversation opens a profile | More on GitHub / Find me on GitHub name the actual destination |
+| Missing-cover title posters | Compact, readable project entries |
+
+Loupe is intentionally text-led because its existing remote cover resembles a
+test fixture. RISE and OfficeChaos also use text entries because they have no
+cover. FolderDock, Shobdo and QuickKit use their existing genuine assets.
+No project data or remote images were changed. Unused serialized content fields
+and the legacy WorkStage source remain for compatibility; WorkStage is no
+longer imported by the active landing and its obsolete CSS was removed.
+
+### Verification and limits
+
+- Lint, typecheck and all 260 tests in 31 files passed on the final source.
+  Test command: `npm test -- --config src/themes/professional/components/brand-logo/vitest.config.mts --maxWorkers=2`.
+- Production build passed. Production HTTP returned 200, cache HIT and
+  prerender 1; all six landing project links were present.
+- Rendered desktop, tablet and mobile layouts were inspected. Measurements at
+  320, 390, 768, 1024, 1440 and 1920px found no horizontal overflow or clipped
+  headings, with one logo stage. All header links measure at least 44x44px.
+- Browser review exercised skip-to-main with keyboard focus, project View
+  cursor and keyboard hiding, Shobdo navigation and back, About and top links,
+  logo rotation/pause and mobile resize. All three gallery images loaded.
+- The final manual Impeccable scan covered all seven changed markup files and
+  returned zero findings. Assessment A and B are retained with the evidence;
+  a clean detector is not a visual quality or monetary-value rating.
+- Taste Skill returned **GATE: ERROR**: standalone Chrome/Edge/Chromium was
+  unavailable. Its copy, consistency and layout checks did not run. The gate
+  was not rerun, as instructed by its result. Actual browser review used IAB.
+- Real touch devices, screen-reader speech, forced-colors and 200% zoom were
+  not runtime-tested in this pass. Reduced-motion/coarse-pointer/forced-color
+  cursor fallbacks remain in CSS and device motion policy remains covered by
+  the existing tests. The pre-existing Three.Clock deprecation warning remains.
+- The prior ignored empty-state harness was updated for Hero's smaller API
+  and current headline. It passed: empty message, one logo, no stage tiles,
+  current headline and embedded mobile poster. It is evidence, not shipped code.
+
+Evidence and current `git diff --stat main` are saved under
+screenshots/skill-review-2026-11-13/. Skills were installed from emilkowalski/skills,
+pbakaus/impeccable and Leonxlnx/taste-skill; the existing frontend-design matches
+anthropics/skills. Source commits and hashes are in the installation manifest
+above. The skills are available on subsequent turns and were read for this pass.
+
+### Every file changed in this editorial pass
+
+These entries update the earlier complete branch-against-main table in this
+document. The current diff statistics are editorial-diff-stat-main.txt.
+
+| File | Why it changed |
+| --- | --- |
+| src/themes/professional/landing.tsx | Project-first section order, About capabilities, honest GitHub destination and shared SVG arrows |
+| src/themes/professional/landing-content.ts | Shorter factual copy, accurate CTA labels and explicit text-led Loupe presentation |
+| src/themes/professional/landing-styles.ts | Large gallery, responsive captions, aligned About content, 44px header targets, restrained hover/press states and scoped cursor styles |
+| src/themes/professional/components/hero.tsx | Compact introduction and logo; removes the duplicated carousel from the active landing |
+| src/themes/professional/components/work-index.tsx | One database-ordered gallery, real large covers, compact missing-cover entries and empty state |
+| src/themes/professional/components/brand-logo/hero-styles.ts | Expressive Newsreader heading, smaller stage and quieter responsive controls |
+| src/themes/professional/components/brand-logo/logo-stage.tsx | Shared SVG rotation icon; scene behavior stays intact |
+| src/themes/professional/components/icons.tsx | Authored consistent arrow and rotation SVGs |
+| src/themes/professional/components/magnetic-link.tsx | Subtler movement gated to fine-pointer hover with motion enabled |
+| src/themes/professional/components/studio-cursor.tsx | Shared SVG arrow within the project View chip |
+| src/themes/professional/components/brand-logo/README.md | This checkpoint, decisions, verification, limitations and file explanations |
+
+No dependencies, database writes, paid services, push or deployment. The
+pre-existing AGENTS.md edit and four untracked alternate logo PNGs are preserved
+and excluded from the local editorial commit. Next: user review of the local
+preview at http://127.0.0.1:3000/; publishing remains separately scoped.
+
+Production motion evidence confirms seven parts and one preserved hole, a
+whole-logo turn, and time holding at 75.855 while paused across a resize to
+320px. The canvas remained visible; Play resumed motion. Production was stopped
+after review, and dev was restored with explicit hostname 127.0.0.1 on port
+3000. Its final HTTP returned 200 with all six project entries.

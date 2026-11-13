@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { Component, useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { canAnimateLogo } from "./logo-policy";
+import { RotateIcon } from "../icons";
 
 const Scene = dynamic(() => import("./logo-scene").then(module => module.LogoScene), { ssr: false });
 const introKey = "rns-logo-intro-v1";
@@ -113,7 +114,7 @@ export function LogoStage({ children, enabled }: { children: ReactNode; enabled:
       {show3D && <div className="rns-logo-canvas" aria-hidden="true" style={{ opacity: ready ? 1 : 0 }}><LogoBoundary onError={onError}><Scene active={inView && tabVisible && !paused} pointer={pointer} scroll={scroll} skipIntro={skipIntro} spin={spin} onReady={onReady} onIdle={onIdle} onError={onError} onFrame={onFrame} /></LogoBoundary></div>}
     </div>
     {canMove && !failed && <div className="rns-logo-controls">
-      <button type="button" className="rns-logo-spin" onClick={() => { if (!admitted) admit(); setPaused(false); setSpin(value => value + 1); }}>Rotate logo <span aria-hidden="true">↻</span></button>
+      <button type="button" className="rns-logo-spin" onClick={() => { if (!admitted) admit(); setPaused(false); setSpin(value => value + 1); }}>Rotate logo <span><RotateIcon /></span></button>
       {ready && <button type="button" className="rns-logo-pause" aria-label={paused ? "Play logo motion" : "Pause logo motion"} aria-pressed={paused} onClick={() => setPaused(value => !value)}>{paused ? "Play" : "Pause"}</button>}
     </div>}
   </div>;
