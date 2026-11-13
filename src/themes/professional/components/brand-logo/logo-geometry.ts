@@ -2,9 +2,11 @@ import { Box2, BufferGeometry, ExtrudeGeometry, Path, Shape, ShapeUtils, Vector2
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
-export function extrudeShape(shape: Shape): BufferGeometry {
-  const raw = new ExtrudeGeometry(shape, { depth: .14, steps: 1, bevelEnabled: true, bevelThickness: .02, bevelSize: .014, bevelSegments: 3, curveSegments: 1 });
-  raw.translate(0, 0, -.07);
+type Extrusion = { depth: number; bevel: number };
+export function extrudeShape(shape: Shape, options?: Extrusion): BufferGeometry {
+  const depth = options?.depth ?? .14;
+  const raw = new ExtrudeGeometry(shape, { depth, steps: 1, bevelEnabled: true, bevelThickness: options?.bevel ?? .02, bevelSize: options?.bevel ?? .014, bevelSegments: 3, curveSegments: 1 });
+  raw.translate(0, 0, -depth / 2);
   raw.deleteAttribute("uv");
   const geometry = mergeVertices(raw, .00001);
   raw.dispose();
@@ -37,7 +39,7 @@ function ring(points: Vector2[], center: Vector2, scale: number) {
   return [...simplifyOpen(normalized.slice(0, farthest + 1), .008).slice(0, -1), ...simplifyOpen([...normalized.slice(farthest), normalized[0]], .008).slice(0, -1)];
 }
 
-export function buildLogoGeometry(svg: string) {
+export function buildLogoGeometry(svg: string, extrusion?: Extrusion) {
   const parsed = new SVGLoader().parse(svg);
   const originals = parsed.paths.flatMap(path => path.toShapes().map(shape => ({ shape, accent: path.color.getHexString().toLowerCase() === "ffc900" })));
   const box = new Box2().setFromPoints(originals.flatMap(p => p.shape.getPoints(3)));
@@ -50,7 +52,7 @@ export function buildLogoGeometry(svg: string) {
     if (outer.length < 3 || Math.abs(ShapeUtils.area(outer)) < .001) return [];
     const normalized = new Shape(outer);
     normalized.holes = shape.holes.map(hole => new Path(ring(hole.getPoints(3), center, scale)));
-    const geometry = extrudeShape(normalized);
+    const geometry = extrudeShape(normalized, extrusion);
     geometry.computeBoundingBox();
     const bounds = geometry.boundingBox!;
     return [{ geometry, accent, center: [(bounds.min.x + bounds.max.x) / 2, (bounds.min.y + bounds.max.y) / 2] as [number, number], holes: normalized.holes.length }];

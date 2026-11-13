@@ -9,7 +9,7 @@ export function StudioCursor({ enabled }: { enabled: boolean }) {
 
   useEffect(() => {
     const node = cursor.current;
-    const root = node?.closest<HTMLElement>(".rns-landing");
+    const root = node?.closest<HTMLElement>(".rns-landing,.rns-studio");
     if (!node || !root || !enabled) return;
     const media = matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) and (forced-colors: none)");
     let frame = 0;
@@ -26,12 +26,12 @@ export function StudioCursor({ enabled }: { enabled: boolean }) {
       const control = target?.closest("a,button,[role='button']");
       const blocked = target?.closest("input,textarea,select,[contenteditable]:not([contenteditable='false'])")
         || control?.matches(":disabled,[aria-disabled='true']")
-        || (!control && target?.closest("h1,h2,h3,p"));
+        || (!control && target?.closest("h1,h2,h3,p,.studio-stage"));
       if (!target || !root.contains(target) || blocked || document.getSelection()?.isCollapsed === false) {
         node.dataset.visible = "false";
         return;
       }
-      node.dataset.mode = target.closest(".rns-project-link,.rns-scene-link") ? "view" : control ? "action" : "idle";
+      node.dataset.mode = target.closest(".rns-project-link,.rns-scene-link,.studio-project-image") ? "view" : control ? "action" : "idle";
       node.dataset.tone = target.closest("[data-brand-tone]")?.getAttribute("data-brand-tone") ?? "light";
       node.style.transform = `translate3d(${Math.min(point.x + 20, innerWidth - 96)}px,${Math.min(point.y + 20, innerHeight - 48)}px,0)`;
       node.dataset.visible = "true";

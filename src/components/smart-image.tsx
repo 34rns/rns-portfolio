@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { SyntheticEvent } from "react";
 
 type SmartImageProps = {
   src: string;
@@ -7,9 +8,11 @@ type SmartImageProps = {
   sizes?: string;
   priority?: boolean;
   fill?: boolean;
+  onError?: () => void;
+  onLoad?: (event: SyntheticEvent<HTMLImageElement>) => void;
 };
 
-export function SmartImage({ src, alt, className, sizes, priority, fill }: SmartImageProps) {
+export function SmartImage({ src, alt, className, sizes, priority, fill, onError, onLoad }: SmartImageProps) {
   if (src.startsWith("/")) {
     if (fill) {
       return (
@@ -21,6 +24,8 @@ export function SmartImage({ src, alt, className, sizes, priority, fill }: Smart
           loading={priority ? "eager" : undefined}
           fetchPriority={priority ? "high" : undefined}
           className={className}
+          onError={onError}
+          onLoad={onLoad}
         />
       );
     }
@@ -34,6 +39,8 @@ export function SmartImage({ src, alt, className, sizes, priority, fill }: Smart
         loading={priority ? "eager" : undefined}
         fetchPriority={priority ? "high" : undefined}
         className={className}
+        onError={onError}
+        onLoad={onLoad}
       />
     );
   }
@@ -46,6 +53,8 @@ export function SmartImage({ src, alt, className, sizes, priority, fill }: Smart
       src={src}
       alt={alt}
       className={className}
+      onError={onError}
+      onLoad={onLoad}
       style={
         fill
           ? { position: "absolute", inset: 0, width: "100%", height: "100%" }

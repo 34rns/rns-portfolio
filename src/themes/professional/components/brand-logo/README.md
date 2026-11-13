@@ -438,3 +438,12 @@ whole-logo turn, and time holding at 75.855 while paused across a resize to
 320px. The canvas remained visible; Play resumed motion. Production was stopped
 after review, and dev was restored with explicit hostname 127.0.0.1 on port
 3000. Its final HTTP returned 200 with all six project entries.
+
+## Latest checkpoint — interactive studio, 13 November 2026
+
+The user rejected the editorial direction above and authorized a fresh
+interactive homepage plus a SaaS-style admin. The active landing is now the
+settings-driven interactive studio. Current decisions, every changed-file
+reason, verification, screenshots and the prepared (unapplied) settings
+migration are recorded in [the interactive studio checkpoint](../../../../../docs/interactive-studio-checkpoint.md).
+Continue from that checkpoint. The earlier sections remain historical evidence.

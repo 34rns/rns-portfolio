@@ -31,7 +31,7 @@ export type ThemeDefinition = {
   blurb: string;
   tokens: ThemeTokens;
   /** Only the default theme ships the landing layout. */
-  Landing?: ComponentType<{ projects: ProjectView[] }>;
+  Landing?: ComponentType<{ projects: ProjectView[]; settings?: import("@/lib/site-settings/config").SiteSettings }>;
   ProjectPage: ComponentType<ProjectPageProps>;
   Preview: ComponentType;
   motion: {

@@ -56,6 +56,16 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/** Independent homepage drafts and published settings; project records stay separate. */
+export const siteSettings = pgTable("site_settings", {
+  id: text("id").primaryKey(),
+  draft: jsonb("draft").$type<import("../site-settings/config").SiteSettings>().notNull(),
+  published: jsonb("published").$type<import("../site-settings/config").SiteSettings>().notNull(),
+  revision: integer("revision").notNull().default(0),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+});
+
 export const projects = pgTable("projects", {
   id: uuid("id").primaryKey().defaultRandom(),
   slug: text("slug").notNull().unique(),

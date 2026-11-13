@@ -14,13 +14,13 @@ describe("logo power policy", () => {
 });
 
 describe("beveled logo geometry", () => {
-  it("preserves a real hole and produces finite outward normals", () => {
+  it.each([undefined, { depth: .5, bevel: .06 }])("preserves a real hole and finite normals with extrusion %o", options => {
     const shape = new Shape();
     shape.moveTo(-2, -2); shape.lineTo(2, -2); shape.lineTo(2, 2); shape.lineTo(-2, 2); shape.closePath();
     const hole = new Path();
     hole.moveTo(-.6, -.6); hole.lineTo(-.6, .6); hole.lineTo(.6, .6); hole.lineTo(.6, -.6); hole.closePath();
     shape.holes.push(hole);
-    const geometry = extrudeShape(shape);
+    const geometry = extrudeShape(shape, options);
     const positions = geometry.getAttribute("position");
     const normals = geometry.getAttribute("normal");
     const index = geometry.getIndex();
