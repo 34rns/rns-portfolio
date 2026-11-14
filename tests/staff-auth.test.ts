@@ -1,0 +1,32 @@
+import { beforeAll, afterAll, it, expect, vi } from "vitest";
+import { randomUUID } from "node:crypto";
+import { startTestPostgres } from "./helpers/licensing-postgres";
+import { createLicenseStore } from "@/lib/licensing/transaction-store";
+import { hashPassword } from "@/lib/auth/password";
+import { createStaffInvite,acceptStaffInvite,authenticateStaff,loadStaffPrincipal,updateStaff } from "@/lib/auth/staff";
+import { beginTotp,confirmTotp,totpCode } from "@/lib/auth/totp";
+import type { Principal } from "@/lib/licensing/contracts";
+let runtime:Awaited<ReturnType<typeof startTestPostgres>>,store:ReturnType<typeof createLicenseStore>,owner:Principal;
+const now=new Date("2026-01-01"),password="synthetic-password-long-enough";
+beforeAll(async()=>{vi.stubEnv("LICENSE_SECRET","local-testing-material-at-least-thirty-two-bytes");runtime=await startTestPostgres();store=createLicenseStore(runtime.url,runtime.pool);const id=randomUUID();await runtime.pool.query("INSERT INTO admin_members(id,email,name,password_hash,role) VALUES($1,$2,'Owner',$3,'owner')",[id,`${id}@example.test`,await hashPassword(password)]);owner={kind:"staff",id,role:"owner",appIds:[],environments:["sandbox","live"],capabilities:[],authenticatedAt:now.getTime()};},60000);
+afterAll(async()=>{vi.unstubAllEnvs();await runtime?.stop();});
+it("accepts one-use invitations and denies stale disabled sessions",async()=>{
+ const email=`${randomUUID()}@example.test`;const invite=await createStaffInvite(store,owner,{email,name:"Helper",role:"helper",appIds:[]},now);
+ const member=await acceptStaffInvite(store,invite.token,{name:"Helper",password},now);
+ await expect(acceptStaffInvite(store,invite.token,{name:"Helper",password},now)).rejects.toMatchObject({code:"invalid_invite"});
+ const login=await authenticateStaff(store,email,password,"",now);expect(login?.id).toBe(member.id);
+ expect((await loadStaffPrincipal(store,member.id,login!.sessionVersion,now.getTime())).role).toBe("helper");
+ await updateStaff(store,owner,member.id,{disabled:true},now);
+ await expect(loadStaffPrincipal(store,member.id,login!.sessionVersion,now.getTime())).rejects.toMatchObject({code:"unauthorized"});
+});
+it("retains a usable owner and enforces confirmed second-factor/recovery replay protection",async()=>{
+ await expect(updateStaff(store,owner,owner.id,{role:"viewer"},now)).rejects.toMatchObject({code:"last_owner"});
+ const setup=await beginTotp(store,owner,now);const code=totpCode(setup.secret,now);
+ await expect(confirmTotp(store,owner,"000000",now)).rejects.toMatchObject({code:"invalid_second_factor"});
+ await confirmTotp(store,owner,code,now);
+ const email=(await runtime.pool.query("SELECT email FROM admin_members WHERE id=$1",[owner.id])).rows[0].email;
+ expect(await authenticateStaff(store,email,password,code,now)).toBeNull();
+ expect(await authenticateStaff(store,email,password,totpCode(setup.secret,new Date(now.getTime()+30000)),new Date(now.getTime()+30000))).not.toBeNull();
+ expect(await authenticateStaff(store,email,password,setup.recoveryCodes[0],now)).not.toBeNull();
+ expect(await authenticateStaff(store,email,password,setup.recoveryCodes[0],now)).toBeNull();
+});

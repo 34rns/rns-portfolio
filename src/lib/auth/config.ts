@@ -12,14 +12,17 @@ export const authConfig = {
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        const role = (user as { role?: "admin" | "customer" }).role ?? "admin";
-        token.role = role;
+        token.role = user.role;
+        token.sessionVersion = user.sessionVersion;
+        token.authenticatedAt = Date.now();
       }
       return token;
     },
     session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role === "customer" ? "customer" : "admin";
+        session.user.role = token.role === "customer" || token.role === "admin" || token.role === "staff" ? token.role : undefined;
+        session.user.sessionVersion = typeof token.sessionVersion === "number" ? token.sessionVersion : undefined;
+        session.user.authenticatedAt = typeof token.authenticatedAt === "number" ? token.authenticatedAt : undefined;
         if (token.sub) session.user.id = token.sub;
       }
       return session;

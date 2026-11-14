@@ -1,0 +1,6 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KeyGate feature gate example</title>
+<body style="font-family:system-ui;max-width:700px;margin:60px auto;padding:24px"><h1>Free tools. Pro when you need it.</h1><p>This example keeps free work available and gates a premium operation.</p><button>Free action</button><p data-keygate="export_pdf" hidden>PDF export is unlocked. Your backend must also validate the license before generating a valuable export.</p><button data-keygate-open>Enter a code</button><script>
+// Replace both values with your product's actual origin and UUID.
+const script=document.createElement('script');script.src='http://localhost:3100/widget.js';script.dataset.app='YOUR-APP-UUID';script.dataset.environment='sandbox';document.body.append(script);
+</script></body></html>

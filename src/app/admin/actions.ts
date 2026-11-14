@@ -35,6 +35,7 @@ export async function loginAction(
     await signIn("admin", {
       email: String(formData.get("email") ?? ""),
       password: String(formData.get("password") ?? ""),
+      otp: String(formData.get("otp") ?? ""),
       redirectTo: "/admin",
     });
     return {};

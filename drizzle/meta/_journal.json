@@ -43,6 +43,41 @@
       "when": 1794573836753,
       "tag": "0005_sad_orphan",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794625036856,
+      "tag": "0006_warm_thaddeus_ross",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794625474519,
+      "tag": "0007_remarkable_sentinels",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794625890961,
+      "tag": "0008_tiresome_bug",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794632876820,
+      "tag": "0009_eminent_bedlam",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794637304660,
+      "tag": "0010_chief_starfox",
+      "breakpoints": true
     }
   ]
 }

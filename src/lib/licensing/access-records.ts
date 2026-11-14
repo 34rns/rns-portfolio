@@ -1,0 +1,4 @@
+import type { AppScope, GrantInput } from "./contracts";
+export type CodeRecord={id:string;app_id:string;environment:string;grant:GrantInput;key_ciphertext:string;redemption_count:number;max_redemptions:number;max_devices:number;redeem_by:Date|null;revoked_at:Date|null;masked:string;note:string;created_at:Date};
+export type AccessRecord={id:string;app_id:string;environment:AppScope["environment"];binding_hash:string;subject:string|null;activation_lookup:string;activation_ciphertext:string;max_devices:number;min_token_revision?:number;revision:number;paused_at:Date|null;revoked_at:Date|null;note:string;created_at:Date};
+export type GrantRecord={id:string;license_id:string;code_id:string|null;input:GrantInput;plan_priority:number;starts_at:Date;expires_at:Date|null;remaining_seconds:number|null;undone_at:Date|null};

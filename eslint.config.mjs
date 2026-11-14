@@ -12,7 +12,14 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    ".local/**",
+    ".vercel/**",
+    ".open-next/**",
+    ".wrangler/**",
+    "sdks/javascript/dist/**",
+    "public/widget.js",
   ]),
+  { files: ["scripts/licensing/windows-symlink.cjs"], rules: { "@typescript-eslint/no-require-imports": "off" } },
 ]);
 
 export default eslintConfig;

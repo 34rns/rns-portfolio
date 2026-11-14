@@ -1,0 +1,13 @@
+# Free hosting preflight — 14 November 2026
+
+Cloudflare Workers is the preferred **candidate** for request/bandwidth headroom: Free provides 100,000 requests/day, 10 ms CPU/invocation, and currently 64 MiB raw Worker size. The measured OpenNext 1.20.17 / Next 16.4.6 bundle was 21,931.80 KiB raw / 5,009.03 KiB gzip; 153 static assets. Local workerd signs in and serves the admin and public-key endpoint. This proves runtime compatibility, not the production CPU budget. A local Node scrypt benchmark took 36–37 ms; keep secure hashing and verify actual hosted CPU before choosing Workers Free. No worker has been uploaded.
+
+Retain Neon/PostgreSQL. The currently documented Neon Free allowance is 1 GB/project, 100 CU-hours/project and 5 GB monthly egress. D1 is not required. Account-specific plans/remaining quota were not inspected or changed. The current `.env.local` targets production: never use it for test migrations.
+
+For uploads, choose existing Blob or the new R2 adapter. R2 uses a dedicated `PORTFOLIO_UPLOADS` bucket, at most 1,000 files and 8 GiB total; writes are serialized with a PostgreSQL advisory lock and are refused at the storage limit. Maximum per upload remains 8 MiB for images / 40 MiB for models. New files have distinct `/api/uploads/r2/` URLs; old Vercel Blob URLs keep working. Hosted local disk is refused. Delete unused files before retrying a capped upload.
+
+**R2 is metered storage with included usage, not an unconditional free plan.** Its Standard allowance is 10 GB-month, 1M Class A and 10M Class B operations, with free egress; excess is billable. Cache and upload buckets share the account allowance. Do not activate R2 or any billing resource automatically. Do not promise a zero bill from an application cap: other buckets, cache operations and account usage also count. A strictly no-billing setup uses a local/self-hosted Node + PostgreSQL server, or a verified hard-capped managed plan. Netlify Free is the fallback if Workers CPU or storage provisioning fails the free requirements; exact adapter/storage compatibility remains a release gate.
+
+No paid plan, account signup, database write in production or hosting migration has been made. A Workers Free production release still requires account/quota inspection, genuine CPU evidence, durable upload provisioning and preservation of issuer/callback/CORS URLs. A local benchmark or local preview is not a hosted Free-plan performance claim.
+
+Official sources: [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/), [limits](https://developers.cloudflare.com/workers/platform/limits/), [R2 pricing](https://developers.cloudflare.com/r2/pricing/), [Neon plans](https://neon.com/pricing), [Netlify plans](https://www.netlify.com/pricing/).

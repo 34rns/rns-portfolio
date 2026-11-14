@@ -1,0 +1,2 @@
+import { verifyRequestLicense,type GateOptions } from "./index";
+export function requireLicense(options:GateOptions){return async(request:{headers:Record<string,string|string[]|undefined>},response:{status:(code:number)=>{json:(body:unknown)=>unknown}},next:()=>void)=>{const headers=new Headers();for(const [key,value] of Object.entries(request.headers))if(typeof value==="string")headers.set(key,value);if(!await verifyRequestLicense(new Request("https://middleware.invalid",{headers}),options))return response.status(403).json({code:"license_required"});next();};}

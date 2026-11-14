@@ -1,0 +1,42 @@
+{
+  "appId": "f103734b-d45e-43e6-9e9b-14be5b1083cf",
+  "environment": "sandbox",
+  "deviceId": "sdk-installation",
+  "apiUrl": "https://license.example.test/v1",
+  "now": 1767225600000,
+  "jwks": {
+    "keys": [
+      {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "A7R9u3oCfpgENAAGd5DOjeuarXMCrY6VaH4Vz5BUa6Y",
+        "kid": "QWABcv4Ynr",
+        "alg": "EdDSA",
+        "use": "sig"
+      }
+    ]
+  },
+  "response": {
+    "access": {
+      "licenseId": "610de051-b6b0-4b85-8af9-e92d52fb2bc8",
+      "source": "app",
+      "appId": "f103734b-d45e-43e6-9e9b-14be5b1083cf",
+      "environment": "sandbox",
+      "status": "active",
+      "planKey": "pro",
+      "features": [
+        {
+          "key": "export",
+          "expiresAt": "2026-01-01T01:00:00.000Z"
+        }
+      ],
+      "expiresAt": null,
+      "revision": 1,
+      "deviceId": "sdk-installation"
+    },
+    "token": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6IlFXQUJjdjRZbnIifQ.eyJ2Ijoia2V5Z2F0ZS52MSIsImlzcyI6Imh0dHBzOi8vbGljZW5zZS5leGFtcGxlLnRlc3QiLCJhdWQiOiJmMTAzNzM0Yi1kNDVlLTQzZTYtOWU5Yi0xNGJlNWIxMDgzY2YiLCJlbnYiOiJzYW5kYm94Iiwia2lkIjoiUVdBQmN2NFluciIsInN1YiI6IjYxMGRlMDUxLWI2YjAtNGI4NS04YWY5LWU5MmQ1MmZiMmJjOCIsImRldiI6Imo2MEZ1YnB1TzBDRm9seU1uVUpwbVkiLCJwbGFuIjoicHJvIiwiZmVhdHVyZXMiOlt7ImtleSI6ImV4cG9ydCIsImV4cGlyZXNBdCI6IjIwMjYtMDEtMDFUMDE6MDA6MDAuMDAwWiJ9XSwiaWF0IjoxNzY3MjI1NjAwLCJleHAiOjE3Njc0ODQ4MDAsInJlZnJlc2hfYWZ0ZXIiOjE3NjczMTIwMDAsIm9mZmxpbmVfdW50aWwiOjE3Njc0ODQ4MDAsImxlIjpudWxsLCJyZXYiOjF9.uuy_UcfVqa7FgbD5dBKvFA4olYfo5045wQkWqPJGgTxkHCAGd32TA2prvt4TmOSmBkLDhinICkqA-eWQXoSkCw",
+    "refreshAfter": "2026-01-02T00:00:00.000Z",
+    "offlineUntil": "2026-01-04T00:00:00.000Z"
+  },
+  "wrongEnvironment": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6IlFXQUJjdjRZbnIifQ.eyJ2Ijoia2V5Z2F0ZS52MSIsImlzcyI6Imh0dHBzOi8vbGljZW5zZS5leGFtcGxlLnRlc3QiLCJhdWQiOiJmMTAzNzM0Yi1kNDVlLTQzZTYtOWU5Yi0xNGJlNWIxMDgzY2YiLCJlbnYiOiJsaXZlIiwia2lkIjoiUVdBQmN2NFluciIsInN1YiI6IjYxMGRlMDUxLWI2YjAtNGI4NS04YWY5LWU5MmQ1MmZiMmJjOCIsImRldiI6Imo2MEZ1YnB1TzBDRm9seU1uVUpwbVkiLCJwbGFuIjoicHJvIiwiZmVhdHVyZXMiOlt7ImtleSI6ImV4cG9ydCIsImV4cGlyZXNBdCI6IjIwMjYtMDEtMDFUMDE6MDA6MDAuMDAwWiJ9XSwiaWF0IjoxNzY3MjI1NjAwLCJleHAiOjE3Njc0ODQ4MDAsInJlZnJlc2hfYWZ0ZXIiOjE3NjczMTIwMDAsIm9mZmxpbmVfdW50aWwiOjE3Njc0ODQ4MDAsImxlIjpudWxsLCJyZXYiOjF9.mTTimVseUxkI2kkb9VEh5_HzZztLbpEZB-GjkcmMbW2Fv2NJpedHwAg67SnH9xAIE957R3J65X4nbGS3LAT9DQ"
+}

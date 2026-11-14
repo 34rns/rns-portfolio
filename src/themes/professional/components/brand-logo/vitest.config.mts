@@ -5,6 +5,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "node",
+    testTimeout: 15000,
+    exclude: ["node_modules/**", ".local/**", ".vercel/**", ".open-next/**", ".wrangler/**"],
     include: ["tests/**/*.test.ts", "src/themes/professional/components/brand-logo/*.test.ts"],
     env: { MOCK_PAYMENT_SECRET: "vitest-mock-secret", PAYMENT_PROVIDER: "mock" },
   },

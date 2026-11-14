@@ -1,6 +1,6 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { portfolioRequestDenied } from "@/lib/auth/portfolio-http";
 import { UPLOAD_POLICY, validateUploadToken } from "@/lib/uploads/policy";
 import { resolveStorageDriver, StorageNotConfiguredError } from "@/lib/uploads/storage";
 
@@ -22,13 +22,8 @@ type ClientPayload = {
 export async function POST(request: Request) {
   // Check the session before touching Blob so a missing token cannot turn into
   // a configuration error for signed-out callers.
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Sign in to upload." }, { status: 401 });
-  }
-  if (session.user.role !== "admin") {
-    return NextResponse.json({ error: "Admins only." }, { status: 403 });
-  }
+  const denied = await portfolioRequestDenied();
+  if (denied) return denied;
 
   let body: HandleUploadBody;
   try {
@@ -62,9 +57,7 @@ export async function POST(request: Request) {
       body,
       request,
       onBeforeGenerateToken: async (pathname, clientPayload) => {
-        const session = await auth();
-        if (!session?.user) throw new Error("Sign in to upload.");
-        if (session.user.role !== "admin") throw new Error("Admins only.");
+        if (await portfolioRequestDenied()) throw new Error("Owners only.");
 
         let payload: ClientPayload = {};
         try {

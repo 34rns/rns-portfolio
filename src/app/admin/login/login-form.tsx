@@ -35,6 +35,7 @@ export function LoginForm() {
         />
       </div>
 
+      <div><label className="admin-label" htmlFor="otp">Authenticator or recovery code <span>(if enabled)</span></label><input className="admin-field" id="otp" name="otp" autoComplete="one-time-code" maxLength={100} /></div>
       {state?.error ? (
         <p className="text-sm text-[#B3261E]" role="alert">
           {state.error}

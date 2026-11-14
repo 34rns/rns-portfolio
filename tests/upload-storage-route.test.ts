@@ -14,7 +14,7 @@ const PNG = Uint8Array.from([
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
 ]);
 
-const adminSession = { user: { id: "u1", email: "admin@example.com", role: "admin" } };
+const adminSession = { user: { id: "admin", email: "admin@example.com", role: "admin" } };
 
 function uploadRequest(): Request {
   const form = new FormData();

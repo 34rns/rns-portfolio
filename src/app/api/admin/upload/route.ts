@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { portfolioRequestDenied } from "@/lib/auth/portfolio-http";
 import { UPLOAD_POLICY, validateUpload } from "@/lib/uploads/policy";
 import { getStorage, StorageNotConfiguredError } from "@/lib/uploads/storage";
 
@@ -9,13 +9,8 @@ export const dynamic = "force-dynamic";
 const MAX_REQUEST_BYTES = UPLOAD_POLICY.model.maxBytes + 1024 * 1024;
 
 export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Sign in to upload." }, { status: 401 });
-  }
-  if (session.user.role !== "admin") {
-    return NextResponse.json({ error: "Admins only." }, { status: 403 });
-  }
+  const denied = await portfolioRequestDenied();
+  if (denied) return denied;
 
   const declared = Number(request.headers.get("content-length") ?? "0");
   if (declared > MAX_REQUEST_BYTES) {

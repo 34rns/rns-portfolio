@@ -1,4 +1,4 @@
-export type AuthRole = "admin" | "customer" | null;
+export type AuthRole = "admin" | "customer" | "staff" | null;
 
 /**
  * Pure authorization rule shared by the proxy and unit tests. Admin pages need
@@ -12,10 +12,10 @@ export function isAuthorized({
   pathname: string;
   role: AuthRole;
 }): boolean {
-  if (pathname === "/admin/login" || pathname.startsWith("/admin/login/")) return true;
+  if (pathname === "/admin/login" || pathname.startsWith("/admin/login/") || pathname === "/admin/invite") return true;
 
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
-    return role === "admin";
+    return role === "admin" || role === "staff";
   }
 
   if (pathname === "/account/login" || pathname.startsWith("/account/login/")) return true;

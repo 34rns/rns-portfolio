@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { portfolioRequestDenied } from "@/lib/auth/portfolio-http";
 import { dbModelStore } from "@/lib/models/db-store";
 import { cleanModelName, isModelUrl } from "@/lib/models/validate";
 
@@ -8,13 +8,8 @@ export const dynamic = "force-dynamic";
 
 /** Records an already-uploaded .glb/.gltf in the library. */
 export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Sign in to manage models." }, { status: 401 });
-  }
-  if (session.user.role !== "admin") {
-    return NextResponse.json({ error: "Admins only." }, { status: 403 });
-  }
+  const denied = await portfolioRequestDenied();
+  if (denied) return denied;
 
   let body: { name?: unknown; url?: unknown; size?: unknown };
   try {

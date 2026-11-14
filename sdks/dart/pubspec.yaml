@@ -1,0 +1,10 @@
+name: rns_keygate
+version: 0.1.0
+description: App-scoped licensing with verified Ed25519 tokens.
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+dependencies:
+  cryptography: 2.9.0
+  http: 1.6.0
+dev_dependencies:
+  test: 1.33.0

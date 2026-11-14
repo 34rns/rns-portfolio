@@ -229,7 +229,7 @@ describe("the model admin surface", () => {
   });
 
   it("refuses a file that is not a model even for an admin", async () => {
-    session.current = { user: { id: "u1", email: "admin@example.com", role: "admin" } };
+    session.current = { user: { id: "admin", email: "admin@example.com", role: "admin" } };
 
     const response = await createModel(
       createRequest({ name: "Cover", url: "https://example.com/cover.png" }),

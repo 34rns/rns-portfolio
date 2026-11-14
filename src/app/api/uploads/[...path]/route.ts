@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readLocalUpload } from "@/lib/uploads/storage";
+import { readR2File, uploadBucket } from "@/lib/uploads/r2-storage";
 
 export const runtime = "nodejs";
 
@@ -9,7 +10,9 @@ export async function GET(
   { params }: { params: Promise<{ path: string[] }> },
 ) {
   const { path: segments } = await params;
-  const file = await readLocalUpload(segments);
+  let file;
+  try { file = segments[0] === "r2" ? await readR2File(uploadBucket(), segments.slice(1)) : await readLocalUpload(segments); }
+  catch { return new NextResponse("Storage unavailable", { status: 503, headers: { "cache-control": "no-store" } }); }
 
   if (!file) {
     return new NextResponse("Not found", { status: 404 });

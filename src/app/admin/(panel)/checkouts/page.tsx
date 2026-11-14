@@ -73,7 +73,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
     if (filter) search.set("status", filter);
     if (target > 0) search.set("page", String(target));
     const query = search.toString();
-    return `/admin/orders${query ? `?${query}` : ""}`;
+    return `/admin/checkouts${query ? `?${query}` : ""}`;
   };
 
   return (
@@ -192,7 +192,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
 
       <nav aria-label="Filter orders" className="mt-8 flex flex-wrap gap-x-4 gap-y-2 text-sm">
         <Link
-          href="/admin/orders"
+          href="/admin/checkouts"
           className={filter ? "underline text-[#6B6B64]" : "font-medium underline"}
         >
           All
@@ -200,7 +200,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
         {purchaseStatus.enumValues.map((status) => (
           <Link
             key={status}
-            href={`/admin/orders?status=${status}`}
+            href={`/admin/checkouts?status=${status}`}
             className={
               filter === status ? "font-medium underline" : "underline text-[#6B6B64]"
             }

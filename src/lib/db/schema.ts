@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+export * from "./license-schema";
 import {
   boolean,
   index,

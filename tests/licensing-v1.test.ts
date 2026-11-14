@@ -1,0 +1,56 @@
+import { beforeAll,afterAll,it,expect,vi } from "vitest";
+import { generateKeyPairSync,randomUUID } from "node:crypto";
+import { startTestPostgres } from "./helpers/licensing-postgres";
+import { createLicenseStore } from "@/lib/licensing/transaction-store";
+import { createApp } from "@/lib/licensing/apps";
+import { issueCodes } from "@/lib/licensing/access";
+import { createAppKey } from "@/lib/licensing/api-keys";
+import { handleAdminV1 } from "@/lib/licensing/admin-http";
+import { handleV1 } from "@/lib/licensing/http";
+import { signAccessToken,verifyAccessToken } from "@/lib/licensing/v1-token";
+import type { AccessSnapshot,AppScope,Principal } from "@/lib/licensing/contracts";
+let runtime:Awaited<ReturnType<typeof startTestPostgres>>,store:ReturnType<typeof createLicenseStore>,scope:AppScope;
+const now=new Date("2026-01-01"),owner:Principal={kind:"staff",id:"owner",role:"owner",appIds:[],environments:["sandbox","live"],capabilities:[]};
+beforeAll(async()=>{vi.stubEnv("LICENSE_SECRET","local-testing-material-at-least-thirty-two-bytes");vi.stubEnv("KEYGATE_ISSUER","https://licenses.example.test");const pair=generateKeyPairSync("ed25519");vi.stubEnv("LICENSE_TOKEN_PRIVATE_KEY",pair.privateKey.export({format:"der",type:"pkcs8"}).toString("base64"));runtime=await startTestPostgres();store=createLicenseStore(runtime.url,runtime.pool);const app=await createApp(store,owner,{name:"HTTP demo",slug:`http-${randomUUID()}`,allowedOrigins:["https://app.example.test"]});scope={appId:app.id,environment:"sandbox"};},60000);
+afterAll(async()=>{vi.unstubAllEnvs();await runtime?.stop();});
+it("a backend-verified account activates a second device without an activation credential",async()=>{
+ const app=await createApp(store,owner,{name:"Account app",slug:`account-${randomUUID()}`,bindingMode:"account"}),accountScope={appId:app.id,environment:"sandbox" as const};
+ const key=await createAppKey(store,{...owner,authenticatedAt:Date.now()},accountScope,{name:"Account backend",capabilities:["identity.write"]});
+ const [code]=await issueCodes(store,owner,accountScope,{type:"lifetime",count:1});
+ const post=(path:string,body:object)=>handleV1(new Request(`https://licenses.example.test/v1/${path}`,{method:"POST",headers:{"content-type":"application/json",authorization:`Bearer ${key.secret}`,"idempotency-key":`account-${path}`},body:JSON.stringify({app_id:app.id,environment:"sandbox",user_id:"verified-user",...body})}),[path],store);
+ const first=await post("redeem",{code:code.key,device_id:"account-device-one"});expect(first.status).toBe(200);const result=await first.json();expect(result.activationKey).toBeUndefined();
+ const second=await post("activate",{device_id:"account-device-two"});expect(second.status).toBe(200);expect((await second.json()).access.licenseId).toBe(result.access.licenseId);
+ expect((await post("activate",{device_id:"account-device-three"})).status).toBe(409);
+ expect((await runtime.pool.query("SELECT redemption_count FROM redeem_codes WHERE id=$1",[code.id])).rows[0].redemption_count).toBe(1);
+});
+it("admin HTTP retries apply one extension and reject changed-body reuse",async()=>{
+ const [code]=await issueCodes(store,owner,scope,{type:"timed",durationSeconds:3600,count:1});
+ const redeem=await handleV1(new Request("https://licenses.example.test/v1/redeem",{method:"POST",headers:{"content-type":"application/json","idempotency-key":"admin-extension-base"},body:JSON.stringify({app_id:scope.appId,environment:"sandbox",code:code.key,device_id:"admin-retry-device"})}),["redeem"],store),access=(await redeem.json()).access;
+ const key=await createAppKey(store,{...owner,authenticatedAt:Date.now()},scope,{name:"Support backend",capabilities:["licenses.write"]});
+ const before=(await runtime.pool.query("SELECT expires_at FROM access_grants WHERE license_id=$1",[access.licenseId])).rows[0].expires_at.getTime();
+ const post=(seconds:number)=>handleAdminV1(new Request(`https://licenses.example.test/v1/admin/license.action?app_id=${scope.appId}&environment=sandbox`,{method:"POST",headers:{"content-type":"application/json",authorization:`Bearer ${key.secret}`,"idempotency-key":"support-extend-once"},body:JSON.stringify({licenseId:access.licenseId,action:"extend",seconds,reason:"Verified extension"})}),["license.action"],store);
+ const results=await Promise.all([post(60),post(60)]);expect(results.map(r=>r.status)).toEqual([200,200]);
+ const after=(await runtime.pool.query("SELECT expires_at FROM access_grants WHERE license_id=$1",[access.licenseId])).rows[0].expires_at.getTime();expect(after-before).toBe(60000);
+ expect((await post(120)).status).toBe(409);
+});
+it("binds signed tokens to issuer/app/environment/device and a fixed offline deadline",()=>{
+ const access:AccessSnapshot={licenseId:randomUUID(),source:"app",appId:scope.appId,environment:"sandbox",status:"active",planKey:"pro",features:[{key:"export",expiresAt:"2026-01-01T01:00:00Z"}],expiresAt:null,revision:1,deviceId:"test-device"};
+ const signed=signAccessToken(access,now,{offlineHours:72,expiryGraceHours:0});expect(signed.offlineUntil).toBe("2026-01-04T00:00:00.000Z");
+ expect(verifyAccessToken(signed.token!,scope,"test-device",now).features).toHaveLength(1);
+ expect(verifyAccessToken(signed.token!,scope,"test-device",new Date("2026-01-01T02:00:00Z")).features).toHaveLength(0);
+ expect(()=>verifyAccessToken(signed.token!,{...scope,environment:"live"},"test-device",now)).toThrow();
+ expect(()=>verifyAccessToken(signed.token!,scope,"other-device",now)).toThrow();
+ expect(()=>verifyAccessToken(signed.token!,scope,"test-device",new Date("2026-01-04"))).toThrow();
+ expect(()=>verifyAccessToken(signed.token!,scope,"test-device",new Date("2025-12-31"))).toThrow();
+});
+it("redeems, validates and deactivates through strict APIs without a public device-status oracle",async()=>{
+ const [code]=await issueCodes(store,owner,scope,{type:"lifetime",count:1});
+ const post=(path:string,body:object,extra:Record<string,string>={})=>handleV1(new Request(`https://licenses.example.test/v1/${path}`,{method:"POST",headers:{"content-type":"application/json",origin:"https://app.example.test",...extra},body:JSON.stringify({app_id:scope.appId,environment:scope.environment,...body})}),[path],store);
+ const first=await post("redeem",{code:code.key,device_id:"http-device"},{"idempotency-key":"http-request"});expect(first.status).toBe(200);expect(first.headers.get("cache-control")).toContain("no-store");const result=await first.json();
+ expect((await post("validate",{token:result.token,device_id:"http-device"})).status).toBe(200);
+ expect((await post("status",{license_id:result.access.licenseId,device_id:"http-device"})).status).toBe(400);
+ expect((await post("redeem",{code:code.key,device_id:"other-device",user_id:"forged-account"},{"idempotency-key":"forged"})).status).toBe(401);
+ expect((await post("deactivate",{token:result.token,device_id:"http-device"})).status).toBe(200);
+ expect((await post("validate",{token:result.token,device_id:"http-device"})).status).toBe(401);
+ const denied=await post("redeem",{code:code.key,device_id:"http-device"},{origin:"https://evil.example.test"});expect(denied.status).toBe(403);
+});

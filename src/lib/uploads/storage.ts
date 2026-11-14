@@ -2,8 +2,9 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { del, put } from "@vercel/blob";
 import { contentTypeForExtension } from "./policy";
+import { createR2Storage, uploadBucket } from "./r2-storage";
 
-export type StorageDriver = "local" | "vercel-blob";
+export type StorageDriver = "local" | "vercel-blob" | "r2";
 
 /**
  * Raised when the configuration says Blob but the token is not there. The
@@ -123,6 +124,11 @@ const LOCAL_URL_PREFIX = "/api/uploads/";
 export async function deleteStoredFile(url: string): Promise<void> {
   const driver = resolveStorageDriver();
 
+  if (url.startsWith("/api/uploads/r2/")) {
+    if (driver !== "r2") throw new StorageNotConfiguredError("Configure the R2 upload bucket before removing its files.");
+    return getStorage().remove(url.slice("/api/uploads/r2/".length).split("/").map(decodeURIComponent).join("/"));
+  }
+
   if (url.startsWith(LOCAL_URL_PREFIX)) {
     const key = url
       .slice(LOCAL_URL_PREFIX.length)
@@ -130,12 +136,14 @@ export async function deleteStoredFile(url: string): Promise<void> {
       .map(decodeURIComponent)
       .join("/");
     if (driver === "local") return localStorageAdapter.remove(key);
-    return blobStorageAdapter.remove(key);
+    if (driver === "vercel-blob") return blobStorageAdapter.remove(key);
+    return;
   }
 
   if (/^https?:\/\//i.test(url) && driver === "vercel-blob") {
     return blobStorageAdapter.remove(url);
   }
+  if (/^https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//i.test(url) && process.env.BLOB_READ_WRITE_TOKEN) return blobStorageAdapter.remove(url);
 }
 
 /**
@@ -148,11 +156,12 @@ export async function deleteStoredFile(url: string): Promise<void> {
  */
 export function resolveStorageDriver(): StorageDriver {
   const configured = process.env.STORAGE_PROVIDER?.trim().toLowerCase();
+  if (configured === "r2") return "r2";
   if (configured === "blob" || configured === "vercel-blob") return "vercel-blob";
   if (configured === "local" || configured === "disk") return "local";
   if (configured) {
     throw new StorageNotConfiguredError(
-      `Unknown STORAGE_PROVIDER "${configured}". Use "blob" or "local".`,
+      `Unknown STORAGE_PROVIDER "${configured}". Use "blob", "r2" or "local".`,
     );
   }
   return process.env.BLOB_READ_WRITE_TOKEN ? "vercel-blob" : "local";
@@ -161,8 +170,8 @@ export function resolveStorageDriver(): StorageDriver {
 /** True when the configured driver is usable right now. */
 export function storageReady(): boolean {
   try {
-    if (resolveStorageDriver() === "local") return true;
-    return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+    getStorage();
+    return true;
   } catch {
     return false;
   }
@@ -170,6 +179,10 @@ export function storageReady(): boolean {
 
 export function getStorage(): StorageAdapter {
   const driver = resolveStorageDriver();
+  if (driver === "local" && process.env.CF_WORKER_CONTEXT === "true") throw new StorageNotConfiguredError("Hosted uploads require durable storage. Configure R2 or Blob.");
+  if (driver === "r2") {
+    try { return createR2Storage(uploadBucket()); } catch { throw new StorageNotConfiguredError("R2 uploads need PORTFOLIO_UPLOADS and a configured database. No files were written to disk."); }
+  }
   if (driver === "vercel-blob" && !process.env.BLOB_READ_WRITE_TOKEN) {
     throw new StorageNotConfiguredError(MISSING_BLOB_TOKEN);
   }

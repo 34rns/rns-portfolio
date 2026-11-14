@@ -1,0 +1,3 @@
+import { createKeyGateClient,type ClientOptions,type StoredAccess,type Storage } from "./index.ts";
+export function browserStorage(appId:string,environment:string):Storage{const key=`keygate:${appId}:${environment}`;return {read:async()=>{const value=localStorage.getItem(key);return value?JSON.parse(value) as StoredAccess:null;},write:async(value)=>localStorage.setItem(key,JSON.stringify(value)),clear:async()=>localStorage.removeItem(key)};}
+export function createBrowserClient(options:Omit<ClientOptions,"storage">){return createKeyGateClient({...options,storage:browserStorage(options.appId,options.environment)});}

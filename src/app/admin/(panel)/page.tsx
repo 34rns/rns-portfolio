@@ -3,7 +3,8 @@ import { getAllProjects, getAdminStats } from "@/lib/db/queries";
 import { dbStore } from "@/lib/payments/db-store";
 import { formatPrice } from "@/lib/projects/view";
 export const dynamic = "force-dynamic";
-export default async function AdminDashboard() {
+export { default } from "./license-dashboard";
+export async function PortfolioDashboard() {
   const [stats, projects, commerce] = await Promise.all([getAdminStats(), getAllProjects(), dbStore.commerceStats()]);
   return <div><header className="admin-page-heading"><div><span className="admin-eyebrow">RNS STUDIO</span><h1>Your creative workspace.</h1><p>Keep your projects current and your portfolio unmistakably yours.</p></div><Link href="/admin/projects/new" className="admin-primary">+ New project</Link></header>
     <div className="admin-stat-grid">{[{ label: "Total projects", value: stats.total, note: "In your library" }, { label: "Published", value: stats.published, note: "Publicly available" }, { label: "Drafts", value: stats.drafts, note: "Work in progress" }, { label: "Paid projects", value: stats.paid, note: "Products in your library" }].map(s => <div className="admin-card admin-stat" key={s.label}><span>{s.label}</span><strong>{s.value}</strong><small>{s.note}</small></div>)}</div>

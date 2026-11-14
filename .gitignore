@@ -63,3 +63,18 @@ skills-lock.json
 # Local review screenshots
 /screenshots/
 /.local/
+
+# Generated licensing builds and runtimes
+/.open-next/
+/.wrangler/
+/sdks/javascript/dist/
+/sdks/python/*.egg-info/
+**/__pycache__/
+**/.pytest_cache/
+
+/sdks/dotnet/**/bin/
+/sdks/dotnet/**/obj/
+/sdks/kotlin/build/
+/sdks/dart/.dart_tool/
+/sdks/dart/pubspec.lock
+.dev.vars*

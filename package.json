@@ -14,7 +14,15 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:backup": "tsx scripts/backup.ts",
     "db:seed": "tsx scripts/seed.ts",
-    "admin:hash": "node scripts/hash-password.mjs"
+    "admin:hash": "node scripts/hash-password.mjs",
+    "widget:build": "tsx scripts/licensing/build-widget.ts",
+    "prebuild": "npm run widget:build",
+    "licensing:demo": "tsx scripts/licensing/dev.ts",
+    "test:e2e": "playwright test",
+    "licensing:build": "tsx scripts/licensing/safe-build.ts",
+    "licensing:cloudflare": "tsx scripts/licensing/safe-build.ts --cloudflare",
+    "licensing:package": "tsx scripts/licensing/package-module.ts",
+    "licensing:jobs": "tsx scripts/licensing/run-jobs.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
@@ -23,8 +31,9 @@
     "@vercel/blob": "^2.8.2",
     "drizzle-orm": "^0.45.4",
     "motion": "^14.3.0",
-    "next": "16.4.2",
+    "next": "^16.4.6",
     "next-auth": "^5.0.0-beta.32",
+    "pg": "^8.23.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-markdown": "^10.1.0",
@@ -33,17 +42,40 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@apidevtools/swagger-parser": "^13.1.0",
+    "@opennextjs/cloudflare": "^1.20.17",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^24.19.2",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.186.0",
     "drizzle-kit": "^0.31.11",
+    "embedded-postgres": "^18.6.0-beta.19",
     "eslint": "^9",
-    "eslint-config-next": "16.4.2",
+    "eslint-config-next": "^16.4.6",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",
-    "vitest": "^5.0.5"
+    "vitest": "^5.0.5",
+    "wrangler": "^4.148.0"
+  },
+  "overrides": {
+    "@vercel/cli-config": "0.4.0",
+    "glob": "14.0.6",
+    "minimatch": "11.0.8",
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    }
+  },
+  "allowScripts": {
+    "@embedded-postgres/windows-x64@18.6.0-beta.19": true,
+    "workerd@1.20261006.1": true,
+    "esbuild@0.18.20": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true,
+    "esbuild@0.28.1": true,
+    "unrs-resolver@1.12.2": true
   }
 }

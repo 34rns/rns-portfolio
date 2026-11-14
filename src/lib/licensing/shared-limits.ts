@@ -1,0 +1,10 @@
+import { LicenseDomainError } from "./contracts";
+import type { AppStore } from "./transaction-store";
+export class RateLimitError extends LicenseDomainError { constructor(public retryAfterSeconds:number){super("rate_limited",429);} }
+export async function checkSharedLimit(store:AppStore,key:string,limit:number,seconds:number,now:Date):Promise<void>{
+  const window=new Date(Math.floor(now.getTime()/(seconds*1000))*seconds*1000),expires=new Date(window.getTime()+seconds*1000);
+  const allowed=await store.transaction(async tx=>{const [bucket]=await tx.query<{count:number;locked_until:Date|null}>("INSERT INTO license_rate_buckets(key,count,window_at,expires_at) VALUES($1,1,$2,$3) ON CONFLICT(key) DO UPDATE SET count=CASE WHEN license_rate_buckets.window_at=$2 THEN license_rate_buckets.count+1 ELSE 1 END,window_at=$2,expires_at=$3 RETURNING count,locked_until",[key,window,expires]);return bucket.count<=limit && (!bucket.locked_until||bucket.locked_until<=now);});
+  if(!allowed)throw new RateLimitError(Math.max(1,Math.ceil((expires.getTime()-now.getTime())/1000)));
+}
+export async function recordRedeemFailure(store:AppStore,key:string,now:Date){await store.transaction(async tx=>{await tx.query("INSERT INTO license_rate_buckets(key,count,window_at,expires_at) VALUES($1,1,$2,$3) ON CONFLICT(key) DO UPDATE SET count=CASE WHEN license_rate_buckets.window_at>$2-interval '10 minutes' THEN license_rate_buckets.count+1 ELSE 1 END,window_at=CASE WHEN license_rate_buckets.window_at>$2-interval '10 minutes' THEN license_rate_buckets.window_at ELSE $2 END,expires_at=$3,locked_until=CASE WHEN license_rate_buckets.window_at>$2-interval '10 minutes' AND license_rate_buckets.count>=9 THEN $3 ELSE license_rate_buckets.locked_until END",[key,now,new Date(now.getTime()+900000)]);});}
+export async function checkRedeemFailures(store:AppStore,key:string,now:Date){const locked=await store.read(tx=>tx.query<{locked_until:Date}>("SELECT locked_until FROM license_rate_buckets WHERE key=$1 AND locked_until>$2",[key,now]));if(locked.length)throw new RateLimitError(Math.ceil((locked[0].locked_until.getTime()-now.getTime())/1000));}

@@ -1,0 +1,10 @@
+import { generateKeyPairSync } from "node:crypto";
+import { mkdirSync,writeFileSync } from "node:fs";
+import { signAccessToken,publicJwks } from "../../src/lib/licensing/v1-token";
+import type { AccessSnapshot } from "../../src/lib/licensing/contracts";
+const pair=generateKeyPairSync("ed25519");
+process.env.LICENSE_TOKEN_PRIVATE_KEY=pair.privateKey.export({format:"der",type:"pkcs8"}).toString("base64");
+process.env.LICENSE_TOKEN_PRIVATE_KEY_PREVIOUS="";process.env.KEYGATE_ISSUER="https://license.example.test";
+const now=new Date("2026-01-01"),access:AccessSnapshot={licenseId:"610de051-b6b0-4b85-8af9-e92d52fb2bc8",source:"app",appId:"f103734b-d45e-43e6-9e9b-14be5b1083cf",environment:"sandbox",status:"active",planKey:"pro",features:[{key:"export",expiresAt:"2026-01-01T01:00:00.000Z"}],expiresAt:null,revision:1,deviceId:"sdk-installation"};
+mkdirSync("sdks/fixtures",{recursive:true});
+writeFileSync("sdks/fixtures/contract.json",JSON.stringify({appId:access.appId,environment:access.environment,deviceId:access.deviceId,apiUrl:"https://license.example.test/v1",now:now.getTime(),jwks:publicJwks(),response:signAccessToken(access,now,{offlineHours:72,expiryGraceHours:0}),wrongEnvironment:signAccessToken({...access,environment:"live"},now,{offlineHours:72,expiryGraceHours:0}).token},null,2));

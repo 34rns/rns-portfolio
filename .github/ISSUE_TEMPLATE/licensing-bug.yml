@@ -1,0 +1,10 @@
+name: Licensing issue
+description: Report a reproducible issue using synthetic data only.
+title: 'Licensing: '
+body:
+  - type: textarea
+    attributes:
+      label: Reproduction and expected result
+      description: Include platform/version and sanitized request ID. Never include real keys, tokens, customer records or credentials.
+    validations:
+      required: true

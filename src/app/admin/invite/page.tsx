@@ -1,0 +1,8 @@
+"use client";
+import { useEffect,useSyncExternalStore,useActionState } from "react";
+import Link from "next/link";
+import { acceptInvite } from "./actions";
+let inviteToken="";
+const subscribe=(notify:()=>void)=>{window.addEventListener("hashchange",notify);return ()=>window.removeEventListener("hashchange",notify);};
+const readToken=()=>{const value=new URLSearchParams(location.hash.slice(1)).get("invite");if(value)inviteToken=value;return inviteToken;};
+export default function Page(){const token=useSyncExternalStore(subscribe,readToken,()=>""),[state,action,pending]=useActionState(acceptInvite,{} as {error?:string;success?:boolean});useEffect(()=>{history.replaceState(null,"",location.pathname);},[]);return <main style={{maxWidth:460,margin:"80px auto",padding:24}}><h1 style={{fontSize:32,letterSpacing:"-.04em"}}>Join RNS Control.</h1><p style={{margin:"18px 0",lineHeight:1.7}}>Your own account, with access assigned by the owner.</p>{state.success?<p>Account created. <Link href="/admin/login">Sign in →</Link></p>:<form action={action} className="kg-stack"><input type="hidden" name="token" value={token}/><label className="admin-label">Your name<input className="admin-field" name="name" required autoComplete="name"/></label><label className="admin-label">Password<input className="admin-field" type="password" name="password" required minLength={12} maxLength={256} autoComplete="new-password"/></label><button disabled={pending||!token} className="admin-primary">{pending?"Creating account…":"Accept invitation"}</button><p role="alert">{state.error||(!token?"Open the full invitation link from your owner.":"")}</p></form>}</main>;}

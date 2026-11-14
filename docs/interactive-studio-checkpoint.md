@@ -1,6 +1,7 @@
 # Interactive RNS studio — checkpoint
 
 Workspace: D:/CustomCodex/rns-portfolio. Branch: landing-redesign.
+License/admin continuation: [14 November planning checkpoint](license-admin-checkpoint.md) covers the proposed KeyGate feature additions, free hosting, navigation and helper documentation. No new licensing features are deployed by that plan.
 This supersedes the editorial landing from commit 2012867. The user authorized a fresh interactive homepage and SaaS-style admin, and chose a surprise-me direction.
 
 ## Result and decisions

@@ -22,9 +22,8 @@ export function siteSettingsDriver() {
   return driver;
 }
 function filename() {
-  const root = process.env.SITE_SETTINGS_DIR
-    ? path.resolve(/* turbopackIgnore: true */ process.env.SITE_SETTINGS_DIR)
-    : path.join(process.cwd(), ".local");
+  const configured = process.env.SITE_SETTINGS_DIR ?? ".local";
+  const root = path.resolve(/* turbopackIgnore: true */ configured);
   return path.join(root, "site-settings.json");
 }
 export async function readSiteState(): Promise<SiteState> {

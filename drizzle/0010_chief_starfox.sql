@@ -1,0 +1,1 @@
+ALTER TABLE "access_licenses" ADD COLUMN "min_token_revision" integer DEFAULT 1 NOT NULL;

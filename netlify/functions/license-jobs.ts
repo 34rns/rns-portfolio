@@ -1,0 +1,2 @@
+export default async function licenseJobs(){const origin=process.env.NEXT_PUBLIC_SITE_URL,secret=process.env.LICENSE_JOBS_SECRET;if(!origin||!secret)throw new Error("Configure the verified admin origin and dedicated job credential.");const response=await fetch(new URL("/api/internal/license-jobs",origin),{method:"POST",headers:{authorization:`Bearer ${secret}`},signal:AbortSignal.timeout(45000)});if(!response.ok)throw new Error("License jobs did not complete.");return new Response(null,{status:204});}
+export const config={schedule:"@hourly"};

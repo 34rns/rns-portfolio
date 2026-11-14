@@ -1,0 +1,10 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { z } from "zod";
+import { appContext } from "../../../app-context";
+import { PageHeader,Badge } from "../../../../licensing-ui";
+export default async function Page({params,searchParams}:{params:Promise<{id:string;codeId:string}>;searchParams:Promise<{environment?:string}>}){
+ const {id,codeId}=await params,filter=await searchParams;if(!z.uuid().safeParse(codeId).success)notFound();const {app,scope,store}=await appContext(id,filter.environment);
+ const detail=await store.read(async tx=>{const [code]=await tx.query<{masked:string;note:string;grant:unknown;redemption_count:number;max_redemptions:number}>(`SELECT masked,note,"grant",redemption_count,max_redemptions FROM redeem_codes WHERE id=$1 AND app_id=$2 AND environment=$3`,[codeId,id,scope.environment]);if(!code)return null;const history=await tx.query<{id:string;license_id:string;created_at:Date;undone_at:Date|null}>("SELECT id,license_id,created_at,undone_at FROM code_redemptions WHERE code_id=$1 ORDER BY created_at DESC LIMIT 100",[codeId]);return {code,history};});if(!detail)notFound();
+ return <><PageHeader title={detail.code.masked} description={`${app.name} · ${scope.environment} · ${detail.code.redemption_count}/${detail.code.max_redemptions} uses`}><Link className="kg-button kg-button-subtle" href={`/admin/apps/${id}/codes?environment=${scope.environment}`}>Back to codes</Link></PageHeader><div className="kg-stack"><section className="kg-card"><h2>Access grant</h2><pre style={{whiteSpace:"pre-wrap"}}>{JSON.stringify(detail.code.grant,null,2)}</pre><p>{detail.code.note||"No note"}</p></section><section className="kg-card"><h2>Redemption history</h2>{detail.history.map(r=><Link key={r.id} className="kg-product-footer" href={`/admin/apps/${id}/access/${r.license_id}?environment=${scope.environment}`}><span>{r.license_id.slice(0,8)}<small>{r.created_at.toISOString()}</small></span><Badge>{r.undone_at?"Undone":"Redeemed"}</Badge></Link>)}{!detail.history.length&&<p>No redemptions yet. The first use of this code will appear here.</p>}</section></div></>;
+}

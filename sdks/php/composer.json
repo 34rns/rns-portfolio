@@ -1,0 +1,1 @@
+{"name":"rns/keygate","description":"App-scoped licensing client","version":"0.1.0","require":{"php":">=8.2","ext-sodium":"*","ext-curl":"*"},"autoload":{"files":["src/Client.php"]}}

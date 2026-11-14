@@ -6,7 +6,9 @@ import { projects, type ProjectRecord } from "./schema";
  * Neon's free tier scales to zero. Retries keep the first admin request after
  * idle from failing on a cold start.
  */
-export async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
+export function withRetry<T>(fn:()=>PromiseLike<T>,attempts?:number):Promise<T>;
+export function withRetry<T extends PromiseLike<unknown>>(fn:()=>T,attempts?:number):Promise<Awaited<T>>;
+export async function withRetry(fn: () => PromiseLike<unknown>, attempts = 3): Promise<unknown> {
   let lastError: unknown;
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     try {

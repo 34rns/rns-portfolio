@@ -1,0 +1,2 @@
+import { defineConfig } from "@playwright/test";
+export default defineConfig({testDir:"e2e",timeout:60000,expect:{timeout:15000},fullyParallel:false,workers:1,use:{baseURL:"http://localhost:3100",viewport:{width:1440,height:1000},trace:"retain-on-failure"},outputDir:".local/playwright-results",reporter:"list",webServer:{command:"npx tsx scripts/licensing/dev.ts",url:"http://localhost:3100/admin/login",reuseExistingServer:true,timeout:90000}});
