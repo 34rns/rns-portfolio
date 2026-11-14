@@ -202,7 +202,7 @@ Project: D:/CustomCodex/rns-portfolio. This inventory covers the local implement
 | `src/lib/licensing/contracts.ts` | Implements contracts for app/environment-scoped access and compatibility. |
 | `src/lib/licensing/entitlements.ts` | Implements entitlements for app/environment-scoped access and compatibility. |
 | `src/lib/licensing/exports.ts` | Implements exports for app/environment-scoped access and compatibility. |
-| `src/lib/licensing/http.ts` | Implements http for app/environment-scoped access and compatibility. |
+| `src/lib/licensing/http.ts` | Implements app/environment-scoped access and compatibility, with private error type/location diagnostics for unexpected failures. |
 | `src/lib/licensing/identity.ts` | Implements identity for app/environment-scoped access and compatibility. |
 | `src/lib/licensing/integration-doc.ts` | Implements integration doc for app/environment-scoped access and compatibility. |
 | `src/lib/licensing/integration-prompt.ts` | Implements integration prompt for app/environment-scoped access and compatibility. |
@@ -214,7 +214,7 @@ Project: D:/CustomCodex/rns-portfolio. This inventory covers the local implement
 | `src/lib/licensing/return-flow.ts` | Implements return flow for app/environment-scoped access and compatibility. |
 | `src/lib/licensing/search.ts` | Implements search for app/environment-scoped access and compatibility. |
 | `src/lib/licensing/shared-limits.ts` | Implements shared limits for app/environment-scoped access and compatibility. |
-| `src/lib/licensing/transaction-store.ts` | Implements transaction store for app/environment-scoped access and compatibility. |
+| `src/lib/licensing/transaction-store.ts` | Implements scoped transactions and restores timestamp Date values when server-rendered Neon bundles return raw text. |
 | `src/lib/licensing/v1-token.ts` | Implements v1 token for app/environment-scoped access and compatibility. |
 | `src/lib/licensing/webhooks.ts` | Implements webhooks for app/environment-scoped access and compatibility. |
 | `src/lib/site-settings/store.ts` | Keeps the site editor storage compatible with the isolated local database driver. |
@@ -255,3 +255,4 @@ Project: D:/CustomCodex/rns-portfolio. This inventory covers the local implement
 | `src/app/api/admin/upload/netlify/route.ts` | Issues owner-only upload tickets, validates assembled bytes and recovers successful publication idempotently. |
 | `tests/netlify-uploads.test.ts` | Verifies permission, replay, tampering, full 40 MiB uploads, private pending state and cleanup failure recovery. |
 | `tests/licensing-jobs-route.test.ts` | Verifies dedicated scheduler authentication and the configured bounded maintenance batch. |
+| `tests/licensing-timestamps.test.ts` | Reproduces the compiled timestamp failure and verifies temporal operations, existing Dates, nulls and unrelated JSON/text values. |
