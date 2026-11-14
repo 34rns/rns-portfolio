@@ -11,6 +11,15 @@ import { signAccessToken,verifyAccessToken } from "@/lib/licensing/v1-token";
 import type { AccessSnapshot,AppScope,Principal } from "@/lib/licensing/contracts";
 let runtime:Awaited<ReturnType<typeof startTestPostgres>>,store:ReturnType<typeof createLicenseStore>,scope:AppScope;
 const now=new Date("2026-01-01"),owner:Principal={kind:"staff",id:"owner",role:"owner",appIds:[],environments:["sandbox","live"],capabilities:[]};
+vi.mock("@/lib/auth/principal",()=>({requirePrincipal:async()=>({...owner,authenticatedAt:Date.now()})}));
+it("accepts the current site origin while retaining a separate token issuer",async()=>{
+ vi.stubEnv("NEXT_PUBLIC_SITE_URL","https://moved.example.test");
+ const options=await handleV1(new Request(`https://moved.example.test/v1/redeem?app_id=${scope.appId}&environment=sandbox`,{method:"OPTIONS",headers:{origin:"https://moved.example.test"}}),["redeem"],store);
+ expect(options.status).toBe(204);
+ const post=(origin:string)=>handleAdminV1(new Request("https://moved.example.test/v1/admin/app.create",{method:"POST",headers:{origin,"content-type":"application/json","idempotency-key":`moved-${origin}`},body:JSON.stringify({name:"Moved app",slug:`moved-${randomUUID()}`})}),["app.create"],store);
+ expect((await post("https://licenses.example.test")).status).toBe(403);
+ expect((await post("https://moved.example.test")).status).toBe(200);
+});
 beforeAll(async()=>{vi.stubEnv("LICENSE_SECRET","local-testing-material-at-least-thirty-two-bytes");vi.stubEnv("KEYGATE_ISSUER","https://licenses.example.test");const pair=generateKeyPairSync("ed25519");vi.stubEnv("LICENSE_TOKEN_PRIVATE_KEY",pair.privateKey.export({format:"der",type:"pkcs8"}).toString("base64"));runtime=await startTestPostgres();store=createLicenseStore(runtime.url,runtime.pool);const app=await createApp(store,owner,{name:"HTTP demo",slug:`http-${randomUUID()}`,allowedOrigins:["https://app.example.test"]});scope={appId:app.id,environment:"sandbox"};},60000);
 afterAll(async()=>{vi.unstubAllEnvs();await runtime?.stop();});
 it("a backend-verified account activates a second device without an activation credential",async()=>{

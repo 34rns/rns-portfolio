@@ -1,4 +1,5 @@
 export type UploadKind = "image" | "model";
+export const NETLIFY_UPLOAD_CHUNK_BYTES = 1024 ** 2;
 
 export type UploadPolicy = {
   label: string;

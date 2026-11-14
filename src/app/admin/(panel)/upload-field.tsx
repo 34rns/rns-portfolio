@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import {
   UPLOAD_POLICY,
+  NETLIFY_UPLOAD_CHUNK_BYTES,
   formatBytes,
   validateUpload,
   type UploadKind,
@@ -21,6 +22,28 @@ async function uploadDirect(
   validated: ValidatedUpload,
   onProgress: (percent: number) => void,
 ): Promise<string> {
+  const configResponse = await fetch("/api/admin/upload/config");
+  if (!configResponse.ok) throw new Error("Upload configuration is unavailable. Sign in and try again.");
+  const config = await configResponse.json();
+  if (config.driver === "netlify-blobs") {
+    const call = async (body: object) => {
+      const response = await fetch("/api/admin/upload/netlify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Upload failed.");
+      return result;
+    };
+    const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", new Uint8Array(bytes)));
+    const sha256 = Array.from(digest, byte => byte.toString(16).padStart(2, "0")).join("");
+    const issued = await call({ name: file.name, type: file.type, size: file.size, head: toBase64(bytes.slice(0, 96)), sha256 });
+    for (let offset = 0; offset < file.size; offset += NETLIFY_UPLOAD_CHUNK_BYTES) await new Promise<void>((resolve, reject) => {
+      const request = new XMLHttpRequest(); request.open("PUT", issued.uploadUrl); request.setRequestHeader("authorization", `Bearer ${issued.ticket}`);
+      request.setRequestHeader("x-upload-part", String(offset / NETLIFY_UPLOAD_CHUNK_BYTES));
+      request.upload.addEventListener("progress", event => { if (event.lengthComputable) onProgress(Math.round((offset + event.loaded) / file.size * 90)); });
+      request.addEventListener("load", () => request.status >= 200 && request.status < 300 || request.status === 409 ? resolve() : reject(new Error("Upload failed. Try again.")));
+      request.addEventListener("error", () => reject(new Error("Upload failed. Check your connection."))); request.send(file.slice(offset, offset + NETLIFY_UPLOAD_CHUNK_BYTES));
+    });
+    const result = await call({ ticket: issued.ticket }); onProgress(100); return result.url;
+  }
   const { upload } = await import("@vercel/blob/client");
   const blob = await upload(validated.key, file, {
     access: "public",

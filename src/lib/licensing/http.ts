@@ -11,12 +11,14 @@ import { authenticateAppKey } from "./api-keys";
 import { resolveBinding } from "./identity";
 import { lookupHash } from "../security/secrets";
 import { checkSharedLimit,checkRedeemFailures,recordRedeemFailure,RateLimitError } from "./shared-limits";
+import { siteUrl } from "../seo";
 const scopeSchema=z.object({app_id:z.uuid(),environment:environmentSchema});
 export const proofSchema=scopeSchema.extend({device_id:z.string().min(8).max(256),token:z.string().min(1).max(16000)}).strict();
 export const activateSchema=scopeSchema.extend({device_id:z.string().min(8).max(256),activation_key:z.string().min(20).max(128).optional(),user_id:z.string().min(1).max(256).optional()}).strict();
 export function trustedClientAddress(headers:Headers){
  if(process.env.KEYGATE_TRUSTED_PROXY==="cloudflare" && process.env.CF_WORKER_CONTEXT==="true")return headers.get("cf-connecting-ip")??"unknown";
  if(process.env.VERCEL==="1")return headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim()??"unknown";
+ if(process.env.NETLIFY==="true")return headers.get("x-nf-client-connection-ip")??"unknown";
  return "shared-untrusted";
 }
 export async function readBoundedJson(request:Request,max=24000):Promise<unknown>{
@@ -35,7 +37,7 @@ export async function handleV1(request:Request,segments:string[],store:AppStore=
   const raw=request.method==="OPTIONS"||path==="app"&&request.method==="GET"?Object.fromEntries(new URL(request.url).searchParams):await readBoundedJson(request);
   const parsedScope=scopeSchema.parse(raw),scope:AppScope={appId:parsedScope.app_id,environment:parsedScope.environment};
   const app=await store.read(tx=>readApp(tx,scope.appId));if(app.archived_at)throw new LicenseDomainError("app_archived",410);
-  const origin=request.headers.get("origin"),allowed=[...app.config.allowedOrigins,new URL(issuer()).origin];
+  const origin=request.headers.get("origin"),allowed=[...app.config.allowedOrigins,new URL(issuer()).origin,new URL(siteUrl()).origin];
   if(origin&&!allowed.includes(origin))throw new LicenseDomainError("origin_denied",403);
   if(origin)Object.assign(headers,{"access-control-allow-origin":origin,"access-control-allow-methods":"POST,OPTIONS","access-control-allow-headers":"content-type,idempotency-key,authorization","access-control-max-age":"600"});
   if(request.method==="OPTIONS")return new Response(null,{status:204,headers});

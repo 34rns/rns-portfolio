@@ -3,8 +3,10 @@ import path from "node:path";
 import { del, put } from "@vercel/blob";
 import { contentTypeForExtension } from "./policy";
 import { createR2Storage, uploadBucket } from "./r2-storage";
+import { createNetlifyStorage } from "./netlify-storage";
+import { siteUrl } from "../seo";
 
-export type StorageDriver = "local" | "vercel-blob" | "r2";
+export type StorageDriver = "local" | "vercel-blob" | "r2" | "netlify-blobs";
 
 /**
  * Raised when the configuration says Blob but the token is not there. The
@@ -124,6 +126,16 @@ const LOCAL_URL_PREFIX = "/api/uploads/";
 export async function deleteStoredFile(url: string): Promise<void> {
   const driver = resolveStorageDriver();
 
+  if (/^https:\/\//i.test(url)) {
+    const parsed = new URL(url);
+    if (parsed.pathname.startsWith("/api/uploads/netlify/") && parsed.origin === new URL(siteUrl()).origin) url = parsed.pathname;
+  }
+
+  if (url.startsWith("/api/uploads/netlify/")) {
+    if (driver !== "netlify-blobs") throw new StorageNotConfiguredError("Configure Netlify storage before removing its files.");
+    return getStorage().remove(url.slice("/api/uploads/netlify/".length));
+  }
+
   if (url.startsWith("/api/uploads/r2/")) {
     if (driver !== "r2") throw new StorageNotConfiguredError("Configure the R2 upload bucket before removing its files.");
     return getStorage().remove(url.slice("/api/uploads/r2/".length).split("/").map(decodeURIComponent).join("/"));
@@ -157,11 +169,12 @@ export async function deleteStoredFile(url: string): Promise<void> {
 export function resolveStorageDriver(): StorageDriver {
   const configured = process.env.STORAGE_PROVIDER?.trim().toLowerCase();
   if (configured === "r2") return "r2";
+  if (configured === "netlify" || configured === "netlify-blobs") return "netlify-blobs";
   if (configured === "blob" || configured === "vercel-blob") return "vercel-blob";
   if (configured === "local" || configured === "disk") return "local";
   if (configured) {
     throw new StorageNotConfiguredError(
-      `Unknown STORAGE_PROVIDER "${configured}". Use "blob", "r2" or "local".`,
+      `Unknown STORAGE_PROVIDER "${configured}". Use "blob", "r2", "netlify" or "local".`,
     );
   }
   return process.env.BLOB_READ_WRITE_TOKEN ? "vercel-blob" : "local";
@@ -179,7 +192,10 @@ export function storageReady(): boolean {
 
 export function getStorage(): StorageAdapter {
   const driver = resolveStorageDriver();
-  if (driver === "local" && process.env.CF_WORKER_CONTEXT === "true") throw new StorageNotConfiguredError("Hosted uploads require durable storage. Configure R2 or Blob.");
+  if (driver === "local" && (process.env.CF_WORKER_CONTEXT === "true" || process.env.NETLIFY === "true")) throw new StorageNotConfiguredError("Hosted uploads require durable storage. Configure Netlify Blobs, R2 or Blob.");
+  if (driver === "netlify-blobs") {
+    try { return createNetlifyStorage(); } catch { throw new StorageNotConfiguredError("Netlify uploads require the deployed site's Blobs context."); }
+  }
   if (driver === "r2") {
     try { return createR2Storage(uploadBucket()); } catch { throw new StorageNotConfiguredError("R2 uploads need PORTFOLIO_UPLOADS and a configured database. No files were written to disk."); }
   }

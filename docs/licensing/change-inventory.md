@@ -247,3 +247,11 @@ Project: D:/CustomCodex/rns-portfolio. This inventory covers the local implement
 | `tests/widget-build.test.ts` | Verifies widget build behavior, isolation and failure handling. |
 | `tsconfig.json` | Build/host/type/lint configuration for the tested licensing module and retained portfolio. |
 | `wrangler.jsonc` | Build/host/type/lint configuration for the tested licensing module and retained portfolio. |
+| `netlify.toml` | Builds the existing Next app and maps native edge upload/read handlers on the verified free commercial host. |
+| `netlify/edge-functions/uploads.ts` | Accepts bounded signed upload chunks privately and streams validated public files up to the existing 40 MiB model limit. |
+| `src/lib/uploads/netlify-ticket.ts` | Verifies short-lived Ed25519 upload tickets, file hashes and size limits with portable Web Crypto. |
+| `src/lib/uploads/netlify-storage.ts` | Persists files atomically in native Netlify Blobs, retains absolute media URLs across host rollback and bounds pending cleanup. |
+| `src/app/api/admin/upload/config/route.ts` | Gives the authorized upload client its active provider without credentials. |
+| `src/app/api/admin/upload/netlify/route.ts` | Issues owner-only upload tickets, validates assembled bytes and recovers successful publication idempotently. |
+| `tests/netlify-uploads.test.ts` | Verifies permission, replay, tampering, full 40 MiB uploads, private pending state and cleanup failure recovery. |
+| `tests/licensing-jobs-route.test.ts` | Verifies dedicated scheduler authentication and the configured bounded maintenance batch. |

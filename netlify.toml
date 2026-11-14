@@ -1,0 +1,15 @@
+[build]
+command = "npm run build"
+publish = ".next"
+functions = "netlify/functions"
+
+[build.environment]
+NODE_VERSION = "24"
+
+[[edge_functions]]
+function = "uploads"
+path = "/api/uploads/netlify/*"
+
+[[edge_functions]]
+function = "uploads"
+path = "/api/admin/upload/netlify-body"

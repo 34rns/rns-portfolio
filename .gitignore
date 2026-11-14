@@ -78,3 +78,6 @@ skills-lock.json
 /sdks/dart/.dart_tool/
 /sdks/dart/pubspec.lock
 .dev.vars*
+
+# Local Netlify folder
+.netlify
