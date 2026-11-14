@@ -77,6 +77,7 @@ export async function handleV1(request:Request,segments:string[],store:AppStore=
   if(path==="deactivate"){if(proof.source==="legacy")await deactivateLegacy(store,scope,access.licenseId,input.device_id);else await deactivateDevice(store,scope,access.licenseId,input.device_id,now);return Response.json({ok:true},{headers});}
   return Response.json(signAccessToken(access,now,app.config),{headers});
  }catch(error){
+  if(!(error instanceof LicenseDomainError)&&!(error instanceof z.ZodError))console.error("KeyGate request failed",{requestId,name:error instanceof Error?error.name:"unknown",trace:error instanceof Error?error.stack?.split("\n").slice(1,4):[]});
   if(failureKey && error instanceof LicenseDomainError && ["invalid_code","code_exhausted","redeem_deadline","identity_required","unauthorized"].includes(error.code))await recordRedeemFailure(store,failureKey,new Date()).catch(()=>{});
   const status=error instanceof LicenseDomainError?error.status:error instanceof z.ZodError?400:503,code=error instanceof LicenseDomainError?error.code:error instanceof z.ZodError?"invalid_body":"storage_unavailable";
   if(error instanceof RateLimitError)headers["retry-after"]=String(error.retryAfterSeconds);
